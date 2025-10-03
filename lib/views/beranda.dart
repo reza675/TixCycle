@@ -24,11 +24,11 @@ class _BerandaPageState extends State<BerandaPage> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [c1, c2, c3, Colors.white],
-          stops: [0.0, 0.5, 0.8, 0.80],
         ),
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        extendBody: true,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.only(top: 8),

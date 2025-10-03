@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tixcycle/views/lihat_tiket.dart';
 import 'views/beranda.dart';
 
 void main() {

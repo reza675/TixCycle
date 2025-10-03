@@ -12,10 +12,7 @@ class CurvedBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(32),
-        topRight: Radius.circular(32),
-      ),
+      
       child: BottomAppBar(
         height: 72,
         color: c1.withOpacity(0.92),
