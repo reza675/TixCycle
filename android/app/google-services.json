@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "868459385765",
+    "project_id": "tixcycle",
+    "storage_bucket": "tixcycle.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868459385765:android:4e27c711a5a40eab018e4c",
+        "android_client_info": {
+          "package_name": "com.example.tixcycle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5kIPPVUkmkKC5VdQs_XQ8C3qVB6KALzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
