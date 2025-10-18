@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tixcycle/views/beli_tiket1.dart';
+import 'package:tixcycle/views/beli_tiket.dart';
 import 'package:tixcycle/views/lihat_tiket.dart';
 import 'views/beranda.dart';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme:
               ColorScheme.fromSeed(seedColor: const Color(0xFF3F5135))),
-      home: const BeliTiket1(),
+      home: const BeliTiket(),
     );
   }
 }
