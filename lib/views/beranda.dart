@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tixcycle/views/widgets/bottom_bar.dart';
+import 'package:tixcycle/views/pencarian_tiket.dart';
+import 'package:tixcycle/controllers/search_controller.dart';
 
 class BerandaPage extends StatefulWidget {
   const BerandaPage({super.key});
@@ -10,11 +13,18 @@ class BerandaPage extends StatefulWidget {
 
 class _BerandaPageState extends State<BerandaPage> {
   int currentIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
 
   static const Color c1 = Color(0xFFFFF8E2);
   static const Color c2 = Color(0xFFB3CC86);
   static const Color c3 = Color(0xFF798E5E);
   static const Color c4 = Color(0xFF3F5135);
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,35 +152,40 @@ class _BerandaPageState extends State<BerandaPage> {
   }
 
   Widget _buildSearchBar(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        children: [
-          const Icon(Icons.search, color: Colors.black54),
-          const SizedBox(width: 8),
-          const Expanded(
-            child: Text(
-              'Cari berdasarkan event atau tempat',
-              style: TextStyle(color: Colors.black54, fontSize: 14),
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => const PencarianTiketPage());
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: const [
+            BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          children: [
+            const Icon(Icons.search, color: Colors.black54),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Cari berdasarkan event atau tempat',
+                style: TextStyle(color: Colors.black54, fontSize: 14),
+              ),
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: c1,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: c3, width: 1),
+            Container(
+              decoration: BoxDecoration(
+                color: c1,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: c3, width: 1),
+              ),
+              padding: const EdgeInsets.all(6),
+              child: const Icon(Icons.tune, color: Colors.black87, size: 20),
             ),
-            padding: const EdgeInsets.all(6),
-            child: const Icon(Icons.tune, color: Colors.black87, size: 20),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
