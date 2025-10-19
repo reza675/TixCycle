@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/ticket_controller.dart';
+import '../models/ticket_model.dart';
 
 class BeliTiket extends StatefulWidget {
   const BeliTiket({super.key});
@@ -13,74 +16,11 @@ class _BeliTiketState extends State<BeliTiket> {
   static const Color c3 = Color(0xFF798E5E);
   static const Color c4 = Color(0xFF3F5135);
 
-  // Data tiket sementara doang
-  final List<Map<String, dynamic>> availableTickets = [
-    {
-      'category': 'GOLD',
-      'price': 280000,
-      'categoryName': 'Gold',
-    },
-    {
-      'category': 'VIP',
-      'price': 1000000,
-      'categoryName': 'VIP',
-    },
-    {
-      'category': 'BRONZE',
-      'price': 350000,
-      'categoryName': 'Bronze',
-    },
-    {
-      'category': 'PLATINUM',
-      'price': 750000,
-      'categoryName': 'Platinum',
-    },
-    {
-      'category': 'VIP (PRESALE)',
-      'price': 800000,
-      'categoryName': 'VIP',
-    },
-  ];
-
-  Map<String, int> selectedTickets = {};
-
-  // Fungsi untuk menambah tiket
-  void addTicket(String category) {
-    setState(() {
-      selectedTickets[category] = (selectedTickets[category] ?? 0) + 1;
-    });
-  }
-
-  // Fungsi untuk mengurangi tiket
-  void removeTicket(String category) {
-    setState(() {
-      if (selectedTickets[category] != null && selectedTickets[category]! > 0) {
-        selectedTickets[category] = selectedTickets[category]! - 1;
-        if (selectedTickets[category] == 0) {
-          selectedTickets.remove(category);
-        }
-      }
-    });
-  }
-
-  // Fungsi  total harga
-  int getTotalPrice() {
-    int total = 0;
-    selectedTickets.forEach((category, quantity) {
-      final ticket =
-          availableTickets.firstWhere((t) => t['category'] == category);
-      total += (ticket['price'] as int) * quantity;
-    });
-    return total;
-  }
-
-  // Fungsi jumlah tiket yang dipilih
-  int getSelectedTicketCount() {
-    return selectedTickets.values.fold(0, (sum, quantity) => sum + quantity);
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Initialize controller
+    Get.put(TicketController());
+
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -141,62 +81,67 @@ class _BeliTiketState extends State<BeliTiket> {
   }
 
   Widget _buildMainContent() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: c2, width: 1),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Judul utama
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Pilih Tiket Anda',
-              style: TextStyle(
-                color: c4,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    final TicketController ticketController = Get.find<TicketController>();
+
+    return Obx(() => Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: c2, width: 1),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 4),
               ),
-            ),
+            ],
           ),
-          // List tiket
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                ...availableTickets.map((ticket) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildTicketCard(
-                        ticket['category'],
-                        'Rp${ticket['price'].toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                        ticket['categoryName'],
-                      ),
-                    )),
-                const SizedBox(height: 20),
-                // Summary tiket yang dipilih
-                if (selectedTickets.isNotEmpty) _buildSelectedTicketsSummary(),
-                const SizedBox(height: 20),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Judul utama
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Pilih Tiket Anda',
+                  style: TextStyle(
+                    color: c4,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // List tiket
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    ...ticketController.availableTickets
+                        .map((ticket) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildTicketCard(
+                                ticket,
+                                ticketController,
+                              ),
+                            )),
+                    const SizedBox(height: 20),
+                    // Summary tiket yang dipilih
+                    if (ticketController.selectedTickets.isNotEmpty)
+                      _buildSelectedTicketsSummary(ticketController),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 
-  Widget _buildTicketCard(String category, String price, String categoryName) {
-    final selectedCount = selectedTickets[category] ?? 0;
+  Widget _buildTicketCard(
+      TicketModel ticket, TicketController ticketController) {
+    final selectedCount =
+        ticketController.selectedTickets[ticket.categoryName] ?? 0;
     final isSelected = selectedCount > 0;
 
     return Container(
@@ -224,7 +169,7 @@ class _BeliTiketState extends State<BeliTiket> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      category,
+                      ticket.categoryName,
                       style: TextStyle(
                         color: Color(0xFF3F5135),
                         fontSize: 16,
@@ -239,7 +184,7 @@ class _BeliTiketState extends State<BeliTiket> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      price,
+                      ticketController.formatPrice(ticket.price),
                       style: const TextStyle(
                           color: Color(0xFF314417),
                           fontSize: 14,
@@ -254,7 +199,8 @@ class _BeliTiketState extends State<BeliTiket> {
                   if (isSelected) ...[
                     // Tombol minus
                     GestureDetector(
-                      onTap: () => removeTicket(category),
+                      onTap: () =>
+                          ticketController.removeTicket(ticket.categoryName),
                       child: Container(
                         width: 32,
                         height: 32,
@@ -293,7 +239,8 @@ class _BeliTiketState extends State<BeliTiket> {
                   ],
                   // Tombol plus/tambah
                   GestureDetector(
-                    onTap: () => addTicket(category),
+                    onTap: () =>
+                        ticketController.addTicket(ticket.categoryName),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
@@ -318,7 +265,7 @@ class _BeliTiketState extends State<BeliTiket> {
           ),
           const SizedBox(height: 12),
           Text(
-            'Nikmati malam penuh nostalgia bersama band legendaris Ungu dengan tiket kategori $categoryName!',
+            'Nikmati malam penuh nostalgia bersama band legendaris Ungu dengan tiket kategori ${ticket.description}!',
             style: const TextStyle(
               color: Colors.black87,
               fontSize: 12,
@@ -345,7 +292,7 @@ class _BeliTiketState extends State<BeliTiket> {
   }
 
   // Widget  menampilkan summary tiket yang dipilih
-  Widget _buildSelectedTicketsSummary() {
+  Widget _buildSelectedTicketsSummary(TicketController ticketController) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -366,7 +313,7 @@ class _BeliTiketState extends State<BeliTiket> {
           ),
           const SizedBox(height: 12),
           // List tiket yang dipilih
-          ...selectedTickets.entries.map((entry) {
+          ...ticketController.selectedTickets.entries.map((entry) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
@@ -407,7 +354,8 @@ class _BeliTiketState extends State<BeliTiket> {
                 ),
               ),
               Text(
-                'Rp${getTotalPrice().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+                ticketController
+                    .formatPrice(ticketController.getTotalPrice().toDouble()),
                 style: TextStyle(
                   color: c4,
                   fontSize: 14,
@@ -422,11 +370,10 @@ class _BeliTiketState extends State<BeliTiket> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Navigate to next page
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                        'Total: Rp${getTotalPrice().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}'),
+                        'Total: ${ticketController.formatPrice(ticketController.getTotalPrice().toDouble())}'),
                     backgroundColor: c2,
                   ),
                 );
