@@ -15,7 +15,10 @@ class TicketModel {
     required this.stock,
   });
 
-  factory TicketModel.fromSnapshot(DocumentSnapshot doc){
+  // Getter untuk mendapatkan category (alias dari categoryName)
+  String get category => categoryName;
+
+  factory TicketModel.fromSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return TicketModel(
       id: doc.id,
@@ -26,12 +29,12 @@ class TicketModel {
     );
   }
 
-  Map<String, dynamic> toJson(){
+  Map<String, dynamic> toJson() {
     return {
-      'categoryName' : categoryName,
-      'price' : price,
-      'description' : description,
-      'stock' : stock,
+      'categoryName': categoryName,
+      'price': price,
+      'description': description,
+      'stock': stock,
     };
   }
 }

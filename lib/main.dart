@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:tixcycle/views/lihat_tiket.dart';
-import 'views/beranda.dart';
+import 'package:get/get.dart';
+import 'package:tixcycle/views/beli_tiket.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:tixcycle/views/beranda.dart';
+import 'package:tixcycle/views/pencarian_tiket.dart';
 import 'firebase_options.dart';
 
-void main() async{
-
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'TixCycle',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
