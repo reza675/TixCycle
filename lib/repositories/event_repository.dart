@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tixcycle/models/ticket_model.dart';
 import 'package:tixcycle/services/firestore_service.dart';
 import 'package:tixcycle/models/event_model.dart';
@@ -7,20 +8,52 @@ class EventRepository {
   final String _collectionPath = 'events';
 
   EventRepository(this._firestoreService);
-  Future<List<EventModel>> getAllEvents() async {
+
+  Future<List<EventModel>> getFeaturedEvents()async{    // ambil data event yang ditaroh di carousel (banner gede paling atas)
+    try {
+      final querySnapshot = await _firestoreService.getQuery(collectionPath: _collectionPath, whereField: 'isFeatured', isEqualTo: true);
+      return querySnapshot.docs.map((doc)=>EventModel.fromSnapshot(doc)).toList();
+    } catch (e){
+      print("Error fetching featured events: $e");
+      rethrow;
+    }
+  }
+
+  Future<List<EventModel>> getAllEventsOnce() async {   // ambil semua data event di awal
     try{
-      final docs = await _firestoreService.ambilCollection(collectionPath: _collectionPath);
+      final docs = await _firestoreService.getCollection(collectionPath: _collectionPath);
       return docs.map((doc)=> EventModel.fromSnapshot(doc)).toList();
 
     } catch (e){
-      print("Error fetching events: $e");
+      print("Error fetching all events: $e");
+      rethrow;
+    }
+  }
+
+  Future<({List<EventModel> events, DocumentSnapshot? lastDoc})> getPaginatedRecommendedEvents({
+    DocumentSnapshot? startAfterDoc,
+    int limit = 10,
+  }) async {
+    try{
+      QuerySnapshot snapshot;
+      if(startAfterDoc==null){
+        snapshot = await _firestoreService.getPaginatedQuery(collectionPath: (_collectionPath), limit: limit, orderBy: 'date');
+
+      } else {
+        snapshot = await _firestoreService.getPaginatedQuery(collectionPath: _collectionPath, limit: limit, orderBy: 'date', startAfter: startAfterDoc);
+      }
+      final events = snapshot.docs.map((doc)=>EventModel.fromSnapshot(doc)).toList();
+      final lastDoc = snapshot.docs.isNotEmpty? snapshot.docs.last : null;
+      return(events: events, lastDoc: lastDoc);
+    } catch(e){
+      print('Error fetching paginated recommended events: $e');
       rethrow;
     }
   }
 
   Future<EventModel> getEventById(String eventId)async{
     try{
-      final doc = await _firestoreService.ambilSatuDdata(path: '$_collectionPath/$eventId');
+      final doc = await _firestoreService.getDocument(path: '$_collectionPath/$eventId');
       if(doc.exists){
         return EventModel.fromSnapshot(doc);
       } else {
@@ -34,7 +67,7 @@ class EventRepository {
 
   Future<List<TicketModel>> getTicketsForEvent(String eventId) async {
     try{
-      final ticketDocs = await _firestoreService.ambilCollection(collectionPath: '$_collectionPath/$eventId/tickets',);
+      final ticketDocs = await _firestoreService.getCollection(collectionPath: '$_collectionPath/$eventId/tickets',);
       return ticketDocs.map((doc)=>TicketModel.fromSnapshot(doc)).toList();
     } catch (e){
       print("Error fetching tickets for event $eventId: $e");

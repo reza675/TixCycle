@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tixcycle/controllers/location_controller.dart';
 import 'package:tixcycle/models/event_model.dart';
 import 'package:tixcycle/repositories/event_repository.dart';
@@ -11,65 +12,115 @@ class BerandaController extends GetxController{
   late final LocationController _locationController;
 
 
-  final RxList<EventModel> _allEvents = <EventModel>[].obs;
+  final RxList<EventModel> featuredEvents = <EventModel>[].obs;   // daftar event buat di carousel paling atas
+  final RxList<Map<String, EventModel>> cityEvents = <Map<String, EventModel>>[].obs;  // daftar event berdasarkan kota
+  final RxList<EventModel> recommendedEvents = <EventModel>[].obs;  // daftar event rekomendasi (lazy loading)
+  final RxList<EventModel> _unfilteredRecommendedEvents = <EventModel>[].obs;
+ 
+  var isLoading = true.obs;
+  var isLoadingMore = false.obs; // penanda loading ketika memuat data event rekomendasi tambahan
+  var hasMoreData = true.obs;   // penanda apakah masih ada data lebih banyak untuk dimuat
+  DocumentSnapshot? _lastDocument;
 
-  final RxList<EventModel> filteredEvents = <EventModel>[].obs;
-  
-  final RxList<String> availableCities = <String>[].obs;
-
-  var isLoading = true.obs; 
-  var selectedCity = ''.obs;
-
+  var searchQuery = ''.obs;
+  var isSearchActive = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     _locationController = Get.find<LocationController>();
     
+    _initializeHomepage();
 
-    fetchAllEvents();
-
-    ever(_locationController.currentCity, _filterEventsByCity);
+    debounce(searchQuery, _performSearch, time: const Duration(milliseconds: 500));
   }
 
-  Future<void> fetchAllEvents() async {
+
+  Future<void> _initializeHomepage() async {
     try {
       isLoading(true);
-      final events = await _eventRepository.getAllEvents();
-      _allEvents.assignAll(events);
-   
-      filteredEvents.assignAll(events);
-      
-      _populateAvailableCities();
+      await _locationController.getMyCity();
+      final featuredFuture = _eventRepository.getFeaturedEvents();
+      final cityListFuture = _eventRepository.getAllEventsOnce();
+      final initialRecsFuture = _eventRepository.getPaginatedRecommendedEvents();
+
+      final results = await Future.wait([featuredFuture, cityListFuture, initialRecsFuture]);
+
+      featuredEvents.assignAll(results[0] as List<EventModel>);
+      final allEventsForCities = results[1] as List<EventModel>;
+      _buildCityList(allEventsForCities);
+
+      final initialRecsResult = results[2] as ({List<EventModel> events, DocumentSnapshot? lastDoc});
+      recommendedEvents.assignAll(initialRecsResult.events);
+      _unfilteredRecommendedEvents.assignAll(initialRecsResult.events); 
+      _lastDocument = initialRecsResult.lastDoc;
+      hasMoreData.value = initialRecsResult.events.isNotEmpty;
+
     } catch (e) {
-      Get.snackbar("Error", "Gagal memuat data event: ${e.toString()}");
+      Get.snackbar("Error", "Gagal memuat halaman beranda: ${e.toString()}");
     } finally {
       isLoading(false);
     }
   }
 
-  void clearFilter() {
-    _locationController.currentCity.value = 'Tekan untuk mencari lokasi';
+  void onSearchQueryChanged(String query){
+    searchQuery.value = query;
   }
 
-  void _filterEventsByCity(String city) {
-    selectedCity.value = city;
-    if (city.isEmpty ||
-        city == 'Tekan untuk mencari lokasi' ||
-        city == 'Izin lokasi diperlukan') {
-      filteredEvents.assignAll(_allEvents);
-      return;
+  void _performSearch(String query){
+    if(query.isEmpty){
+      isSearchActive(false);
+      recommendedEvents.assignAll(_unfilteredRecommendedEvents);
+    } else {
+      isSearchActive(true);
+      final lowerCaseQuery = query.toLowerCase();
+      final results = _unfilteredRecommendedEvents.where((event){
+        final eventNameMatch = event.name.toLowerCase().contains(lowerCaseQuery);
+        final cityNameMatch = event.city.toLowerCase().contains(lowerCaseQuery);
+        return eventNameMatch || cityNameMatch; // Kondisi ATAU
+      }).toList();
+      recommendedEvents.assignAll(results);
     }
-
-    final filtered = _allEvents.where((event) =>
-        event.city.toLowerCase().contains(city.toLowerCase())).toList();
-
-    filteredEvents.assignAll(filtered);
   }
 
-  void _populateAvailableCities() {
-    if (_allEvents.isEmpty) return;
-    final cities = _allEvents.map((event) => event.city).toSet().toList();
-    availableCities.assignAll(cities);
+  Future<void> loadMoreEvents()async{
+    if (isLoadingMore.value || !hasMoreData.value || isSearchActive.value) return;
+
+    try {
+      isLoadingMore(true);
+      final result = await _eventRepository.getPaginatedRecommendedEvents(startAfterDoc: _lastDocument);
+      
+      if (result.events.isNotEmpty) {
+        recommendedEvents.addAll(result.events);
+        _unfilteredRecommendedEvents.addAll(result.events); 
+        _lastDocument = result.lastDoc;
+      } else {
+        hasMoreData.value = false;
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Gagal memuat event lainnya: ${e.toString()}");
+    } finally {
+      isLoadingMore(false);
+    }
+  }
+
+  void _buildCityList(List<EventModel> allEvents) {   // daftar event dikelompokkan berdasarkan kota
+    if (allEvents.isEmpty) return;
+    final Map<String, EventModel> uniqueCityMap = {};
+    for (var event in allEvents) {
+      if (!uniqueCityMap.containsKey(event.city)) {
+        uniqueCityMap[event.city] = event;
+      }
+    }
+    final String currentUserCity = _locationController.currentCity.value;
+    final List<Map<String, EventModel>> sortedCityList = [];
+    if (uniqueCityMap.containsKey(currentUserCity)) {
+      sortedCityList.add({currentUserCity: uniqueCityMap[currentUserCity]!});
+      uniqueCityMap.remove(currentUserCity);
+    }
+    uniqueCityMap.forEach((city, event) {
+      sortedCityList.add({city: event});
+    });
+    cityEvents.assignAll(sortedCityList);
   }
 }
