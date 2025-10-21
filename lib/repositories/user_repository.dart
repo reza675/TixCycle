@@ -8,12 +8,12 @@ class UserRepository {
   UserRepository(this._firestoreService);
 
   Future<void> buatProfilUser(UserModel user)async {
-    await _firestoreService.simpanData(path: '$_collectionPath/${user.id}', data: user.toJson());
+    await _firestoreService.setData(path: '$_collectionPath/${user.id}', data: user.toJson());
   }
 
   Future<UserModel> ambilProfilUser(String userId) async{
     try{
-      DocumentSnapshot doc = await _firestoreService.ambilSatuDdata(path:  '$_collectionPath/$userId');
+      DocumentSnapshot doc = await _firestoreService.getDocument(path:  '$_collectionPath/$userId');
       if(doc.exists){
         return UserModel.fromSnapshot(doc);
       } else {

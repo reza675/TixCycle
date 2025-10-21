@@ -9,6 +9,8 @@ class EventModel {
   final String imageUrl;
   final DateTime date;
   final String address;
+  final String city;
+  final GeoPoint coordinates;
   final String venueName;
   final String organizerId;
   final List<TicketModel> tickets;
@@ -21,6 +23,8 @@ class EventModel {
     this.imageUrl = '',   // image url default isi disini 
     required this.date,
     required this.address,
+    required this.city,
+    required this.coordinates,
     required this.venueName,
     required this.organizerId,
     this.tickets = const [],
@@ -34,6 +38,8 @@ class EventModel {
       description: data['description'] ?? '',
       date: (data['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
       address: data['address'] ?? '',
+      city: data['city'] ?? '',
+      coordinates: data['coordinates'] ?? GeoPoint(0,0),
       organizerId: data['organizerId'] ?? '',
       venueName: data['venueName']?? '',
       startingPrice: (data['startingPrice'] as num?)?.toDouble() ?? 0.0,
