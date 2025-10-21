@@ -21,4 +21,25 @@ class LocationRepository {
       return "Gagal memuat lokasi";
     }
   }
+
+  Future<String> fetchCityFromCoordinates(double latitude, double longitude) async {
+    try {
+      final position = Position(
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: DateTime.now(),
+        accuracy: 0.0,
+        altitude: 0.0,
+        altitudeAccuracy: 0,
+        heading: 0.0,
+        headingAccuracy: 0,
+        speed: 0.0,
+        speedAccuracy: 0.0,
+      );
+      return await _locationService.getCityFromPosition(position);
+    } catch (e) {
+      print("Error in LocationRepository (fetchCityFromCoordinates): $e");
+      rethrow;
+    }
+  }
 }
