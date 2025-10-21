@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tixcycle/views/beli_tiket.dart';
+import 'package:tixcycle/test-drive/input_dummy.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tixcycle/views/beranda.dart';
-import 'package:tixcycle/views/pencarian_tiket.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -28,7 +26,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme:
               ColorScheme.fromSeed(seedColor: const Color(0xFF3F5135))),
-      home: const BerandaPage(),
+      home: const DummyEventFormPage(),
     );
   }
 }
