@@ -1,4 +1,4 @@
-# PANDUAN PENGGUNAAN BERANDA CONTROLLER
+# PANDUAN PENGGUNAAN BERANDA CONTROLLER (untuk halaman beranda)
 
 ## Instalasi dan inisiasi
     - extends class view ke GetView<BerandaController>
