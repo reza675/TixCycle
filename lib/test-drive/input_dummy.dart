@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,8 +8,6 @@ import 'package:tixcycle/services/location_services.dart'; // Asumsikan ini ada
 
 /// Controller untuk mengelola state dan logika form tambah event dummy.
 class DummyEventFormController extends GetxController {
-  // Untuk testing, kita bisa inject repository-nya langsung.
-  // Pastikan Anda sudah mendaftarkan ini di AppBindings Anda.
   final LocationRepository _locationRepository = LocationRepository(LocationServices());
 
   // --- CONTROLLER UNTUK SETIAP TEXTFIELD ---
@@ -25,19 +22,19 @@ class DummyEventFormController extends GetxController {
 
   // --- STATE MANAGEMENT ---
   var isLoading = false.obs;
-  var isFetchingCity = false.obs; // State khusus untuk loading nama kota
-  var autoDetectedCity = '---'.obs; // State untuk menampilkan kota yang terdeteksi
+  var isFetchingCity = false.obs; 
+  var autoDetectedCity = '---'.obs;
+  
+  // --- STATE BARU UNTUK TANGGAL & JAM ---
+  final Rxn<DateTime> selectedDateTime = Rxn<DateTime>();
 
   @override
   void onInit() {
     super.onInit();
-    // Tambahkan listener dengan debounce pada field latitude dan longitude.
-    // Ini akan memanggil API geocoding hanya setelah pengguna berhenti mengetik.
     latController.addListener(_onCoordinatesChanged);
     longController.addListener(_onCoordinatesChanged);
   }
 
-  // Gunakan debounce untuk mencegah pemanggilan API berlebihan
   final _debouncer = Debouncer(delay: const Duration(milliseconds: 1000));
   void _onCoordinatesChanged() {
     _debouncer.call(() {
@@ -45,8 +42,8 @@ class DummyEventFormController extends GetxController {
     });
   }
 
-  /// Mengambil nama kota berdasarkan input latitude dan longitude.
   Future<void> _fetchCityFromCoordinates() async {
+    // ... (kode ini tetap sama)
     final latText = latController.text;
     final longText = longController.text;
 
@@ -62,7 +59,6 @@ class DummyEventFormController extends GetxController {
 
     try {
       isFetchingCity(true);
-      // Panggil repository untuk melakukan reverse geocoding
       final city = await _locationRepository.fetchCityFromCoordinates(lat, long);
       autoDetectedCity.value = city;
     } catch (e) {
@@ -72,42 +68,95 @@ class DummyEventFormController extends GetxController {
     }
   }
 
+  // --- METODE BARU UNTUK PICKER ---
+
+  /// Menampilkan dialog Date Picker
+  Future<void> pickDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: Get.context!,
+      initialDate: selectedDateTime.value ?? DateTime.now(),
+      firstDate: DateTime.now(), // Mulai dari hari ini
+      lastDate: DateTime.now().add(const Duration(days: 730)), // Maksimal 2 tahun ke depan
+    );
+
+    if (pickedDate != null) {
+      // Jaga jam & menit yang sudah ada (jika ada)
+      final currentDateTime = selectedDateTime.value ?? DateTime.now();
+      selectedDateTime.value = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        currentDateTime.hour,
+        currentDateTime.minute,
+      );
+    }
+  }
+
+  /// Menampilkan dialog Time Picker
+  Future<void> pickTime() async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: Get.context!,
+      initialTime: TimeOfDay.fromDateTime(selectedDateTime.value ?? DateTime.now()),
+    );
+
+    if (pickedTime != null) {
+      // Jaga tanggal yang sudah ada
+      final currentDateTime = selectedDateTime.value ?? DateTime.now();
+      selectedDateTime.value = DateTime(
+        currentDateTime.year,
+        currentDateTime.month,
+        currentDateTime.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    }
+  }
+
+  // --- METODE SIMPAN DIPERBARUI ---
+  
   /// Menyimpan event baru ke Firestore.
   Future<void> simpanEvent() async {
-    // Validasi sederhana
-    if (nameController.text.isEmpty || autoDetectedCity.value.contains('---') || autoDetectedCity.value.contains('Gagal')) {
-      Get.snackbar("Input Tidak Lengkap", "Harap isi nama event dan pastikan kota terdeteksi.");
+    // --- VALIDASI DIPERBARUI ---
+    if (nameController.text.isEmpty ||
+        autoDetectedCity.value.contains('---') ||
+        autoDetectedCity.value.contains('Gagal') ||
+        selectedDateTime.value == null) {
+      Get.snackbar("Input Tidak Lengkap",
+          "Harap isi nama, pastikan kota terdeteksi, dan atur tanggal & jam.");
       return;
     }
-    
+
     try {
       isLoading(true);
       final double latitude = double.tryParse(latController.text) ?? 0.0;
       final double longitude = double.tryParse(longController.text) ?? 0.0;
       final double startingPrice = double.tryParse(priceController.text) ?? 0.0;
-      
+
       final eventBaru = EventModel(
         id: '', // Firestore akan membuat ID secara otomatis
         name: nameController.text,
         description: descController.text,
         venueName: venueController.text,
-        imageUrl: imageUrlController.text.isNotEmpty ? imageUrlController.text : 'https://placehold.co/600x400?text=Event',
+        imageUrl: imageUrlController.text.isNotEmpty
+            ? imageUrlController.text
+            : 'https://placehold.co/600x400?text=Event',
         startingPrice: startingPrice,
-        date: DateTime.now().add(const Duration(days: 30)), // Tanggal dummy
-        organizerId: "dummy_organizer_123", // ID panitia dummy
         
-        // Data lokasi dari input
+        // --- TANGGAL & JAM DIPERBARUI ---
+        date: selectedDateTime.value!, // Menggunakan tanggal yang dipilih
+        
+        organizerId: "dummy_organizer_123",
+
+        // --- LOKASI DIPERBARUI ---
         address: addressController.text,
-        city: autoDetectedCity.value, // Gunakan kota yang terdeteksi otomatis
+        city: autoDetectedCity.value,
         coordinates: GeoPoint(latitude, longitude),
       );
 
-      // Simpan ke Firestore
       await FirebaseFirestore.instance.collection('events').add(eventBaru.toJson());
 
       Get.snackbar("Sukses", "Event dummy berhasil ditambahkan!");
       _clearFields();
-
     } catch (e) {
       Get.snackbar("Error", "Gagal menyimpan event: ${e.toString()}");
     } finally {
@@ -115,6 +164,7 @@ class DummyEventFormController extends GetxController {
     }
   }
 
+  /// Mengosongkan semua field.
   void _clearFields() {
     nameController.clear();
     descController.clear();
@@ -125,11 +175,11 @@ class DummyEventFormController extends GetxController {
     latController.clear();
     longController.clear();
     autoDetectedCity.value = '---';
+    selectedDateTime.value = null; // --- BARU ---
   }
 
   @override
   void onClose() {
-    // Hapus listener untuk mencegah memory leak
     latController.removeListener(_onCoordinatesChanged);
     longController.removeListener(_onCoordinatesChanged);
     _debouncer.cancel();
@@ -143,7 +193,6 @@ class DummyEventFormPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Inisialisasi controller saat view dibuat
     final DummyEventFormController controller = Get.put(DummyEventFormController());
 
     return Scaffold(
@@ -160,9 +209,53 @@ class DummyEventFormPage extends StatelessWidget {
             TextField(controller: controller.imageUrlController, decoration: const InputDecoration(labelText: "URL Gambar Poster")),
             TextField(controller: controller.priceController, decoration: const InputDecoration(labelText: "Harga Mulai Dari"), keyboardType: TextInputType.number),
             
+            // --- UI BARU UNTUK TANGGAL & JAM ---
+            const SizedBox(height: 16),
+            Obx(() {
+              // Format tanggal dan jam secara manual agar rapi
+              final dt = controller.selectedDateTime.value;
+              final dateText = dt == null ? 'Belum diatur' : '${dt.day}/${dt.month}/${dt.year}';
+              final timeText = dt == null ? 'Belum diatur' : '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+              
+              return InputDecorator(
+                decoration: const InputDecoration(
+                  labelText: "Tanggal & Jam Event",
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Tanggal: $dateText', style: const TextStyle(fontSize: 16)),
+                    Text('Jam: $timeText', style: const TextStyle(fontSize: 16)),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.calendar_today, size: 18),
+                    label: const Text("Pilih Tanggal"),
+                    onPressed: controller.pickDate,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.access_time, size: 18),
+                    label: const Text("Pilih Jam"),
+                    onPressed: controller.pickTime,
+                  ),
+                ),
+              ],
+            ),
+            // --- AKHIR DARI UI BARU ---
+
             const SizedBox(height: 24),
             const Text("Lokasi Event", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            
             TextField(controller: controller.addressController, decoration: const InputDecoration(labelText: "Alamat Lengkap (cth: Jl. Sudirman No. 1)")),
             const SizedBox(height: 8),
             Row(
@@ -173,19 +266,17 @@ class DummyEventFormPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Tampilan untuk kota yang terdeteksi otomatis
             Obx(() => InputDecorator(
                   decoration: InputDecoration(
                     labelText: "Kota (Otomatis)",
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                   ),
                   child: Row(
                     children: [
-                      Expanded(child: Text(controller.autoDetectedCity.value, style: TextStyle(fontSize: 16))),
+                      Expanded(child: Text(controller.autoDetectedCity.value, style: const TextStyle(fontSize: 16))),
                       if (controller.isFetchingCity.value)
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
@@ -193,7 +284,6 @@ class DummyEventFormPage extends StatelessWidget {
                     ],
                   ),
                 )),
-            
             const SizedBox(height: 32),
             Obx(() => ElevatedButton(
                   onPressed: controller.isLoading.value ? null : controller.simpanEvent,
@@ -208,7 +298,7 @@ class DummyEventFormPage extends StatelessWidget {
   }
 }
 
-
+// Helper class untuk Debouncer
 class Debouncer {
   final Duration delay;
   VoidCallback? _callback;
@@ -217,14 +307,12 @@ class Debouncer {
 
   void call(VoidCallback callback) {
     _callback = callback;
-   
     _timer?.cancel();
-    
     _timer = Timer(delay, _callback!);
   }
 
-  
   void cancel() {
-    _timer?.cancel(); 
+    _timer?.cancel();
   }
 }
+
