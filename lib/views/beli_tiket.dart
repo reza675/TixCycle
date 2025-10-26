@@ -227,14 +227,17 @@ class BeliTiket extends GetView<BeliTiketController> {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            'Nikmati malam penuh nostalgia bersama band legendaris Ungu dengan tiket kategori ${ticket.description}!',
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 12,
-              height: 1.4,
+          if (ticket.description != null && ticket.description!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              ticket.description!, 
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 12,
+                height: 1.4,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
