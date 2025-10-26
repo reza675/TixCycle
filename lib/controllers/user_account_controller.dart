@@ -4,7 +4,7 @@ import 'package:tixcycle/repositories/user_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tixcycle/models/user_model.dart';
 
-class UserAccountController extends GetxController{
+class UserAccountController extends GetxController {
   final AuthRepository _authRepository;
   final UserRepository _userRepository;
 
@@ -16,26 +16,29 @@ class UserAccountController extends GetxController{
   var isLoading = false.obs;
 
   @override
-  void onInit(){
+  void onInit() {
     super.onInit();
     firebaseUser.bindStream(_authRepository.user);
     ever(firebaseUser, _handleAuthChanged);
   }
 
   void _handleAuthChanged(User? user) async {
-    if (user != null){
+    if (user != null) {
       try {
         isLoading(true);
         userProfile.value = await _userRepository.ambilProfilUser(user.uid);
-      } catch (e){
-        Get.snackbar("Error", "Gagal  memuat profil pengguna: ${e.toString()}");
+      } catch (e) {
+        Get.snackbar("Error", "Gagal  memuat profil pengguna: " + e.toString());
         userProfile.value = null;
       } finally {
         isLoading(false);
       }
     } else {
       userProfile.value = null;
-      Get.offAllNamed('/isi pake nama halaman login');
+      // Fitur login belum tersedia, jadi hanya tampilkan info
+      Get.snackbar("Info",
+          "Anda belum login. Fitur login akan tersedia di update berikutnya.");
+      //Get.offAllNamed('/isi pake nama halaman login');
     }
   }
 
@@ -43,7 +46,7 @@ class UserAccountController extends GetxController{
     try {
       isLoading(true);
       await _authRepository.signOut();
-    } catch (e){
+    } catch (e) {
       Get.snackbar("Error", "Gagal sign out: ${e.toString()}");
     } finally {
       isLoading(false);

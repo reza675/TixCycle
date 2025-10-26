@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:get/get.dart';
-import '../controllers/search_controller.dart';
+import '../controllers/beranda_controller.dart';
 import '../models/event_model.dart';
+import '../routes/app_routes.dart';
 
 class PencarianTiketPage extends StatefulWidget {
   final String? initialQuery;
@@ -14,7 +15,8 @@ class PencarianTiketPage extends StatefulWidget {
 
 class _PencarianTiketPageState extends State<PencarianTiketPage> {
   late final TextEditingController _searchController;
-  late final SearchController searchController;
+  // late final SearchController searchController; // Diganti
+  late final BerandaController searchController; // Diganti
 
   static const Color c1 = Color(0xFFFFF8E2);
   static const Color c2 = Color(0xFFB3CC86);
@@ -25,15 +27,23 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.initialQuery ?? '');
-    searchController = Get.put(SearchController());
+    // searchController = Get.put(SearchController()); // Diganti
+    searchController = Get.find<BerandaController>(); // Diganti (mengambil controller yang sudah ada)
+    
     if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
-      searchController.setSearchQuery(widget.initialQuery!);
+      // searchController.setSearchQuery(widget.initialQuery!); // Diganti
+      searchController.onSearchQueryChanged(widget.initialQuery!); // Diganti
+    } else {
+      // Pastikan search query di controller beranda kosong saat masuk halaman ini
+      searchController.onSearchQueryChanged('');
     }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    // Kosongkan query pencarian di BerandaController saat keluar
+    searchController.onSearchQueryChanged('');
     super.dispose();
   }
 
@@ -105,6 +115,7 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
           Expanded(
             child: TextField(
               controller: _searchController,
+              autofocus: true, // Otomatis fokus saat halaman dibuka
               decoration: const InputDecoration(
                 hintText: 'Cari berdasarkan event atau tempat',
                 hintStyle: TextStyle(color: Colors.black54, fontSize: 14),
@@ -112,10 +123,12 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
                 contentPadding: EdgeInsets.zero,
               ),
               onChanged: (value) {
-                searchController.setSearchQuery(value);
+                // searchController.setSearchQuery(value); // Diganti
+                searchController.onSearchQueryChanged(value); // Diganti
               },
               onSubmitted: (value) {
-                searchController.setSearchQuery(value);
+                // searchController.setSearchQuery(value); // Diganti
+                searchController.onSearchQueryChanged(value); // Diganti
               },
             ),
           ),
@@ -123,7 +136,8 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
             GestureDetector(
               onTap: () {
                 _searchController.clear();
-                searchController.clearSearch();
+                // searchController.clearSearch(); // Diganti
+                searchController.onSearchQueryChanged(""); // Diganti
               },
               child: const Icon(Icons.clear, color: Colors.black54, size: 20),
             ),
@@ -144,17 +158,18 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
 
   Widget _buildHasilPencarian(BuildContext context) {
     return Obx(() {
-      if (searchController.isLoading.value) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
+      // if (searchController.isLoading.value) { // Dihapus
+      //   return const Center(
+      //     child: CircularProgressIndicator(),
+      //   );
+      // }
 
       if (searchController.searchQuery.value.isEmpty) {
         return _buildEmptyState();
       }
 
-      if (searchController.searchResults.isEmpty) {
+      // if (searchController.searchResults.isEmpty) { // Diganti
+      if (searchController.recommendedEvents.isEmpty) { // Diganti
         return _buildNoResultsState();
       }
 
@@ -162,7 +177,8 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Hasil Pencarian (${searchController.searchResults.length})',
+            // 'Hasil Pencarian (${searchController.searchResults.length})', // Diganti
+            'Hasil Pencarian (${searchController.recommendedEvents.length})', // Diganti
             style: TextStyle(
               color: c4,
               fontSize: 16,
@@ -170,7 +186,8 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
             ),
           ),
           const SizedBox(height: 12),
-          ...searchController.searchResults
+          // ...searchController.searchResults // Diganti
+          ...searchController.recommendedEvents // Diganti
               .map((event) => _buildEventCard(event))
               .toList(),
         ],
@@ -268,12 +285,8 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
       ),
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to event detail page
-          Get.snackbar(
-            'Event Selected',
-            'Anda memilih: ${event.name}',
-            snackPosition: SnackPosition.BOTTOM,
-          );
+          // Navigasi ke halaman detail event
+          Get.toNamed('${AppRoutes.BERANDA}${AppRoutes.LIHAT_TIKET}/${event.id}');
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -282,11 +295,15 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
+                // child: Image.asset( // Diganti
+                child: Image.network( // Diganti
                   event.imageUrl,
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  // Error handling untuk gambar network
+                  errorBuilder: (context, error, stackTrace) => 
+                    Container(width: 80, height: 80, color: Colors.grey[200], child: Icon(Icons.image_not_supported, color: Colors.grey[400])),
                 ),
               ),
               const SizedBox(width: 12),
@@ -312,7 +329,8 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            '${event.address} • ${event.venueName}',
+                            // '${event.address} • ${event.venueName}', // Diganti agar lebih ringkas
+                            '${event.venueName}, ${event.city}',
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 12,
@@ -343,7 +361,7 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Mulai dari Rp${event.startingPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+                          'Mulai dari Rp${event.startingPrice.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
                           style: TextStyle(
                             color: c2,
                             fontSize: 14,
