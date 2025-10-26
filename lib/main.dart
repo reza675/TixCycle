@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tixcycle/views/beli_tiket.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tixcycle/views/beranda.dart';
-import 'package:tixcycle/views/pencarian_tiket.dart';
+import 'package:tixcycle/bindings/app_bindings.dart';
+import 'package:tixcycle/routes/app_pages.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -18,7 +17,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -28,7 +26,16 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme:
               ColorScheme.fromSeed(seedColor: const Color(0xFF3F5135))),
-      home: const BerandaPage(),
+      initialBinding: AppBindings(),
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
+      // Jika ada navigasi ke route yang tidak dikenal, tampilkan halaman fallback
+      unknownRoute: GetPage(
+        name: '/notfound',
+        page: () => const Scaffold(
+          body: Center(child: Text('Rute tidak ditemukan')),
+        ),
+      ),
     );
   }
 }

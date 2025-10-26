@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:tixcycle/controllers/detail_event_controller.dart';
+import 'package:tixcycle/models/event_model.dart';
 
-class LihatTiketPage extends StatelessWidget {
-  const LihatTiketPage({super.key});
+class DetailEventPage extends GetView<DetailEventController> {
+  const DetailEventPage({super.key});
 
   static const Color c1 = Color(0xFFFFF8E2);
   static const Color c2 = Color(0xFFB3CC86);
@@ -35,76 +38,82 @@ class LihatTiketPage extends StatelessWidget {
           centerTitle: false,
         ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 10,
-                          offset: Offset(0, 4)),
-                    ],
-                    border: Border.all(color: c3, width: 1),
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final evt = controller.event.value;
+            if (evt == null) {
+              return const Center(child: Text('Event tidak ditemukan.'));
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: const [
+                        BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 4)),
+                      ],
+                      border: Border.all(color: c3, width: 1),
+                    ),
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _banner(evt),
+                        const SizedBox(height: 12),
+                        const Divider(
+                          color: Colors.black54,
+                          thickness: 3,
+                        ),
+                        _sectionTitle('WAKTU YANG DI NANTI'),
+                        const SizedBox(height: 10),
+                        _infoRow(
+                            Icons.event_outlined, _formatFullDate(evt.date)),
+                        const SizedBox(height: 8),
+                        _infoRow(Icons.access_time, _formatTime(evt.date)),
+                        const SizedBox(height: 8),
+                        _infoRow(
+                          Icons.place_outlined,
+                          '${evt.venueName}, ${evt.address}',
+                        ),
+                        const SizedBox(height: 14),
+                        const Divider(
+                          color: Colors.black54,
+                          thickness: 3,
+                        ),
+                        _sectionTitle('Deskripsi'),
+                        const SizedBox(height: 10),
+                        _bullet(evt.name),
+                        const SizedBox(height: 8),
+                        Text(
+                          evt.description,
+                          style: const TextStyle(height: 1.45),
+                        ),
+                        const SizedBox(height: 18),
+                        _beliTiketButton(context),
+                      ],
+                    ),
                   ),
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _banner(),
-                      const SizedBox(height: 12),
-                      const Divider(
-                        color: Colors.black54,
-                        thickness: 3,
-                      ),
-                      _sectionTitle('WAKTU YANG DI NANTI'),
-                      const SizedBox(height: 10),
-                      _infoRow(Icons.event_outlined, '22 November 2025'),
-                      const SizedBox(height: 8),
-                      _infoRow(Icons.access_time, '20.00 WIB'),
-                      const SizedBox(height: 8),
-                      _infoRow(
-                        Icons.place_outlined,
-                        'Sahid Raya Hotel & Convention Yogyakarta, Kab. Sleman,\nDaerah Istimewa Yogyakarta',
-                      ),
-                      const SizedBox(height: 14),
-                      const Divider(
-                        color: Colors.black54,
-                        thickness: 3,
-                      ),
-                      _sectionTitle('Deskripsi'),
-                      const SizedBox(height: 10),
-                      _bullet(
-                          'Sahid Raya Exclusive Concert with Ungu – Waktu yang Dinanti'),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Bersiaplah untuk malam penuh nostalgia, di mana lantunan lagu-\nlegendaris dari Ungu akan mengisi setiap sudut hati. Konser\n eksklusif ini digelar di Indraprasta Grand Ballroom, Sahid Raya Hotel\n & Convention Yogyakarta, dengan kapasitas 1.500 penonton dalam\n suasana elegan hotel bintang 4 yang nyaman, mewah, dan terarah.',
-                        style: TextStyle(height: 1.45),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Dengan konsep "Waktu yang Dinanti", konser ini akan membawa\nAnda menelusuri perjalanan musik Ungu, dari hits-hits yang\n mengawali hingga lagu-lagu terbaru yang tak kalah mengena. Nikmati\n momen spesial bersama band yang telah menemani banyak\n perjalanan, cinta, persahabatan, karier, dan cerita hidup banyak orang.',
-                        style: TextStyle(height: 1.45),
-                      ),
-                      const SizedBox(height: 18),
-                      _beliTiketButton(context),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          }),
         ),
       ),
     );
   }
 
-  Widget _banner() {
+  Widget _banner(EventModel evt) {
     return Container(
       decoration: BoxDecoration(
         color: c1,
@@ -118,10 +127,17 @@ class LihatTiketPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: AspectRatio(
           aspectRatio: 16 / 9,
-          child: Image.asset(
-            'images/lihatTiket/lihatTiket1.png',
-            fit: BoxFit.cover,
-          ),
+          child: evt.imageUrl.isNotEmpty
+              ? Image.network(
+                  evt.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Image.asset(
+                    'images/lihatTiket/lihatTiket1.png',
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Image.asset('images/lihatTiket/lihatTiket1.png',
+                  fit: BoxFit.cover),
         ),
       ),
     );
@@ -173,6 +189,31 @@ class LihatTiketPage extends StatelessWidget {
     );
   }
 
+  String _formatFullDate(DateTime d) {
+    const months = [
+      '',
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return '${d.day} ${months[d.month]} ${d.year}';
+  }
+
+  String _formatTime(DateTime d) {
+    final h = d.hour.toString().padLeft(2, '0');
+    final m = d.minute.toString().padLeft(2, '0');
+    return '$h.$m WIB';
+  }
+
   Widget _bullet(String text) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +248,7 @@ class LihatTiketPage extends StatelessWidget {
           height: 54,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFFFFD700), Color(0xFFFFB800)], 
+              colors: [Color(0xFFFFD700), Color(0xFFFFB800)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),

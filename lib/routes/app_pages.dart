@@ -4,11 +4,10 @@ import 'package:tixcycle/bindings/detail_event_binding.dart';
 import 'package:tixcycle/routes/app_routes.dart';
 import 'package:tixcycle/views/beranda.dart';
 import 'package:tixcycle/views/pencarian_tiket.dart';
-import 'package:tixcycle/views/lihat_tiket.dart';
+import 'package:tixcycle/views/detail_event.dart';
 import 'package:tixcycle/views/beli_tiket.dart';
 
 class AppPages {
-
   // rute/halaman pertama (nanti diganti splash)
   static const INITIAL = AppRoutes.BERANDA;
   static final routes = [
