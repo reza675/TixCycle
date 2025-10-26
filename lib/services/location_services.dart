@@ -51,9 +51,9 @@ class LocationServices {
       else if (city != null && city.isNotEmpty) {
         return city;
       }
-      // -------------------------------
+      
     }
-    return "Lokasi tidak diketahui"; // Fallback jika tidak ada data sama sekali
+    return "Lokasi tidak diketahui"; // jika tidak ada data
   } catch (e) {
     print("Error converting coordinates to city: $e");
     return "Gagal mendapatkan lokasi";
