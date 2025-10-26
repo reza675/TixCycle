@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tixcycle/models/event_model.dart';
+import 'package:tixcycle/models/ticket_model.dart';
 import 'package:tixcycle/repositories/location_repository.dart';
 import 'package:tixcycle/services/location_services.dart'; // Asumsikan ini ada
 
@@ -15,25 +16,29 @@ class DummyEventFormController extends GetxController {
   final descController = TextEditingController();
   final venueController = TextEditingController();
   final imageUrlController = TextEditingController();
-  final priceController = TextEditingController();
+  final priceController = TextEditingController(); // Harga Mulai Dari
   final addressController = TextEditingController();
   final latController = TextEditingController();
   final longController = TextEditingController();
 
+
   // --- STATE MANAGEMENT ---
+  final RxList<Map<String, TextEditingController>> ticketFormControllers =
+      <Map<String, TextEditingController>>[].obs;
+
   var isLoading = false.obs;
   var isFetchingCity = false.obs; 
   var autoDetectedCity = '---'.obs;
-  
-  // --- STATE BARU UNTUK TANGGAL & JAM ---
   final Rxn<DateTime> selectedDateTime = Rxn<DateTime>();
 
   @override
-  void onInit() {
+   void onInit() {
     super.onInit();
     latController.addListener(_onCoordinatesChanged);
     longController.addListener(_onCoordinatesChanged);
+    addTicketForm();
   }
+
 
   final _debouncer = Debouncer(delay: const Duration(milliseconds: 1000));
   void _onCoordinatesChanged() {
@@ -68,9 +73,7 @@ class DummyEventFormController extends GetxController {
     }
   }
 
-  // --- METODE BARU UNTUK PICKER ---
-
-  /// Menampilkan dialog Date Picker
+ 
   Future<void> pickDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: Get.context!,
@@ -112,50 +115,111 @@ class DummyEventFormController extends GetxController {
     }
   }
 
-  // --- METODE SIMPAN DIPERBARUI ---
+  /// Menambahkan satu set controller baru untuk baris form tiket.
+  void addTicketForm() {
+    ticketFormControllers.add({
+      'category': TextEditingController(),
+      'price': TextEditingController(),
+      'stock': TextEditingController(),
+      'description': TextEditingController(),
+    });
+  }
+
+  /// Menghapus satu set controller (dan baris form) berdasarkan indeks.
+  void removeTicketForm(int index) {
+    if (ticketFormControllers.length > 1) { // Jaga agar minimal 1 form tersisa
+      // Hapus controller dari memori
+      ticketFormControllers[index].forEach((key, controller) => controller.dispose());
+      ticketFormControllers.removeAt(index);
+    } else {
+      Get.snackbar("Info", "Minimal harus ada satu jenis tiket.");
+    }
+  }
   
   /// Menyimpan event baru ke Firestore.
   Future<void> simpanEvent() async {
-    // --- VALIDASI DIPERBARUI ---
     if (nameController.text.isEmpty ||
         autoDetectedCity.value.contains('---') ||
         autoDetectedCity.value.contains('Gagal') ||
         selectedDateTime.value == null) {
       Get.snackbar("Input Tidak Lengkap",
-          "Harap isi nama, pastikan kota terdeteksi, dan atur tanggal & jam.");
+          "Harap isi detail event, pastikan kota terdeteksi, dan atur tanggal & jam.");
       return;
+    }
+
+    // Validasi input tiket
+    final List<TicketModel> ticketsToSave = [];
+    for (var form in ticketFormControllers) {
+      final category = form['category']!.text;
+      final priceText = form['price']!.text;
+      final stockText = form['stock']!.text;
+      final description = form['description']!.text;
+
+      if (category.isEmpty || priceText.isEmpty || stockText.isEmpty) {
+        Get.snackbar("Input Tiket Tidak Lengkap", "Harap isi Nama Kategori, Harga, dan Stok untuk semua tiket.");
+        return;
+      }
+      final price = double.tryParse(priceText);
+      final stock = int.tryParse(stockText);
+      if (price == null || stock == null) {
+         Get.snackbar("Input Tiket Tidak Valid", "Harga dan Stok harus berupa angka.");
+         return;
+      }
+      ticketsToSave.add(TicketModel(
+        id: '', // Firestore akan generate ID
+        categoryName: category,
+        price: price,
+        stock: stock,
+        description: description,
+      ));
     }
 
     try {
       isLoading(true);
       final double latitude = double.tryParse(latController.text) ?? 0.0;
       final double longitude = double.tryParse(longController.text) ?? 0.0;
-      final double startingPrice = double.tryParse(priceController.text) ?? 0.0;
+      final double startingPrice = double.tryParse(priceController.text) ?? ticketsToSave.map((t) => t.price).reduce((a, b) => a < b ? a : b); // Ambil harga termurah dari tiket jika field kosong
 
+      // 1. Buat EventModel (tanpa tiket di sini)
       final eventBaru = EventModel(
-        id: '', // Firestore akan membuat ID secara otomatis
+        id: '',
         name: nameController.text,
         description: descController.text,
         venueName: venueController.text,
         imageUrl: imageUrlController.text.isNotEmpty
             ? imageUrlController.text
             : 'https://placehold.co/600x400?text=Event',
-        startingPrice: startingPrice,
-        
-        // --- TANGGAL & JAM DIPERBARUI ---
-        date: selectedDateTime.value!, // Menggunakan tanggal yang dipilih
-        
+        startingPrice: startingPrice, // Harga termurah
+        date: selectedDateTime.value!,
         organizerId: "dummy_organizer_123",
-
-        // --- LOKASI DIPERBARUI ---
         address: addressController.text,
         city: autoDetectedCity.value,
         coordinates: GeoPoint(latitude, longitude),
       );
 
-      await FirebaseFirestore.instance.collection('events').add(eventBaru.toJson());
+      // 2. Simpan Event Utama ke Firestore dan dapatkan ID-nya
+      DocumentReference eventRef = await FirebaseFirestore.instance
+          .collection('events')
+          .add(eventBaru.toJson());
+      String eventId = eventRef.id;
 
-      Get.snackbar("Sukses", "Event dummy berhasil ditambahkan!");
+      // 3. Simpan Setiap Tiket ke Sub-koleksi
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      for (var ticket in ticketsToSave) {
+        // Buat referensi dokumen baru di dalam sub-koleksi 'tickets'
+        DocumentReference ticketRef = FirebaseFirestore.instance
+            .collection('events')
+            .doc(eventId)
+            .collection('tickets')
+            .doc(); // Biarkan Firestore membuat ID tiket
+        // Tambahkan operasi set ke batch
+        batch.set(ticketRef, ticket.toJson());
+      }
+      // Jalankan semua operasi tulis tiket sekaligus (lebih efisien)
+      await batch.commit();
+
+
+      Get.snackbar("Sukses", "Event dummy beserta tiketnya berhasil ditambahkan!");
       _clearFields();
     } catch (e) {
       Get.snackbar("Error", "Gagal menyimpan event: ${e.toString()}");
@@ -175,11 +239,27 @@ class DummyEventFormController extends GetxController {
     latController.clear();
     longController.clear();
     autoDetectedCity.value = '---';
-    selectedDateTime.value = null; // --- BARU ---
+    selectedDateTime.value = null;
+    ticketFormControllers.removeRange(1, ticketFormControllers.length);
+    // Kosongkan form tiket pertama
+    ticketFormControllers[0].forEach((key, controller) => controller.clear());
   }
 
-  @override
+ @override
   void onClose() {
+    // Hapus semua text editing controller
+    nameController.dispose();
+    descController.dispose();
+    venueController.dispose();
+    imageUrlController.dispose();
+    priceController.dispose();
+    addressController.dispose();
+    latController.dispose();
+    longController.dispose();
+    // Hapus semua controller tiket
+    for (var form in ticketFormControllers) {
+      form.forEach((key, controller) => controller.dispose());
+    }
     latController.removeListener(_onCoordinatesChanged);
     longController.removeListener(_onCoordinatesChanged);
     _debouncer.cancel();
@@ -284,6 +364,24 @@ class DummyEventFormPage extends StatelessWidget {
                     ],
                   ),
                 )),
+                const SizedBox(height: 24),
+            const Text("Tiket Tersedia", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Obx(() => ListView.builder(
+              shrinkWrap: true, // Penting karena di dalam SingleChildScrollView
+              physics: const NeverScrollableScrollPhysics(), // Nonaktifkan scroll internal
+              itemCount: controller.ticketFormControllers.length,
+              itemBuilder: (context, index) {
+                final form = controller.ticketFormControllers[index];
+                return _buildTicketFormRow(controller, form, index);
+              },
+            )),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text("Tambah Jenis Tiket"),
+              onPressed: controller.addTicketForm,
+            ),
             const SizedBox(height: 32),
             Obx(() => ElevatedButton(
                   onPressed: controller.isLoading.value ? null : controller.simpanEvent,
@@ -291,6 +389,54 @@ class DummyEventFormPage extends StatelessWidget {
                       ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : const Text("SIMPAN EVENT"),
                 )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTicketFormRow(
+      DummyEventFormController controller,
+      Map<String, TextEditingController> form,
+      int index,
+    ) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text("Tiket #${index + 1}", style: TextStyle(fontWeight: FontWeight.bold))),
+                // Tombol Hapus hanya muncul jika ada lebih dari 1 tiket
+                if (controller.ticketFormControllers.length > 1)
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () => controller.removeTicketForm(index),
+                    tooltip: "Hapus Jenis Tiket Ini",
+                  ),
+              ],
+            ),
+            TextField(
+              controller: form['category'],
+              decoration: const InputDecoration(labelText: "Nama Kategori (cth: VIP)"),
+            ),
+            TextField(
+              controller: form['price'],
+              decoration: const InputDecoration(labelText: "Harga"),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: form['stock'],
+              decoration: const InputDecoration(labelText: "Stok Tersedia"),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: form['description'],
+              decoration: const InputDecoration(labelText: "Deskripsi Singkat (Opsional)"),
+              maxLines: 2,
+            ),
           ],
         ),
       ),

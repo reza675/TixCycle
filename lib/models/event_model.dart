@@ -57,6 +57,8 @@ class EventModel {
       'address' : address,
       'venueName' : venueName,
       'organizerId' : organizerId,
+      'city' : city,
+      'coordinates' : coordinates,
     };
   }
 }
