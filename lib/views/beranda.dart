@@ -4,6 +4,8 @@ import 'package:tixcycle/controllers/beranda_controller.dart';
 import 'package:tixcycle/models/event_model.dart';
 import 'package:tixcycle/routes/app_routes.dart';
 import 'package:tixcycle/views/widgets/bottom_bar.dart';
+// using Flutter's built-in PageView instead of external carousel package to avoid
+// conflicts with Flutter SDK's CarouselController
 
 class BerandaPage extends StatefulWidget {
   const BerandaPage({super.key});
@@ -15,6 +17,13 @@ class BerandaPage extends StatefulWidget {
 class _BerandaPageState extends State<BerandaPage> {
   int currentIndex = 0;
 
+  int _currentCarouselIndex = 0;
+  final List<String> _carouselImages = [
+    'images/beranda/tampilan1.jpg', 
+    'images/beranda/tampilan2.png',
+    'images/beranda/tampilan3.png',
+  ];
+  late final PageController _pageController;
   static const Color c1 = Color(0xFFFFF8E2);
   static const Color c2 = Color(0xFFB3CC86);
   static const Color c3 = Color(0xFF798E5E);
@@ -35,6 +44,7 @@ class _BerandaPageState extends State<BerandaPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         extendBody: true,
+        resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: _buildBody(context, controller),
         ),
@@ -48,6 +58,18 @@ class _BerandaPageState extends State<BerandaPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   Widget _buildBody(BuildContext context, BerandaController controller) {
@@ -181,30 +203,102 @@ class _BerandaPageState extends State<BerandaPage> {
   }
 
   Widget _buildBannerCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-              color: Colors.black26, blurRadius: 12, offset: Offset(0, 2)),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: AspectRatio(
-          aspectRatio: 16 / 7,
-          child: Image.asset(
-            'images/beranda/tampilan2.png',
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: Colors.grey[200],
-              child: const Center(child: Icon(Icons.image_not_supported)),
+    final BerandaController controller = Get.find<BerandaController>();
+    return Obx(() {
+      final featured = controller.featuredEvents;
+      final List<String> images = featured.isNotEmpty
+          ? featured.map((e) => e.imageUrl).toList()
+          : _carouselImages;
+
+      if (images.isEmpty) {
+        return Container(
+          height: MediaQuery.of(context).size.width * (7 / 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                  color: Colors.black26, blurRadius: 12, offset: Offset(0, 2)),
+            ],
+          ),
+          child: const Center(child: Icon(Icons.image_not_supported)),
+        );
+      }
+
+      return Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 12,
+                    offset: Offset(0, 2)),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.width * (7 / 16),
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: images.length,
+                  onPageChanged: (index) =>
+                      setState(() => _currentCarouselIndex = index),
+                  itemBuilder: (context, idx) {
+                    final src = images[idx];
+                    final bool isNetwork = src.startsWith('http');
+                    return AspectRatio(
+                      aspectRatio: 16 / 7,
+                      child: isNetwork
+                          ? Image.network(
+                              src,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (c, e, s) => Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                    child: Icon(Icons.image_not_supported)),
+                              ),
+                            )
+                          : Image.asset(
+                              src,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (c, e, s) => Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                    child: Icon(Icons.image_not_supported)),
+                              ),
+                            ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+          const SizedBox(height: 8),
+          // Dots indicator
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: images.asMap().entries.map((entry) {
+              final idx = entry.key;
+              return Container(
+                width: _currentCarouselIndex == idx ? 10 : 8,
+                height: _currentCarouselIndex == idx ? 10 : 8,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentCarouselIndex == idx ? c2 : Colors.grey[300],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildLocationsRow(BerandaController controller) {
@@ -426,16 +520,6 @@ class _BerandaPageState extends State<BerandaPage> {
           ),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          suffixIcon: Container(
-            margin: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: c1,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: c3, width: 1),
-            ),
-            padding: const EdgeInsets.all(6),
-            child: const Icon(Icons.tune, color: Colors.black87, size: 20),
-          ),
         ),
       ),
     );
