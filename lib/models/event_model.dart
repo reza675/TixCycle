@@ -20,7 +20,7 @@ class EventModel {
     required this.name,
     required this.description,
     this.startingPrice = 0.0,
-    this.imageUrl = '',   // image url default isi disini 
+    this.imageUrl = 'https://doodleipsum.com/700x394/abstract?bg=ffffff&i=08cd64ca3f7dc2ed6292d15bdd6d42c2',   // image url default isi disini 
     required this.date,
     required this.address,
     required this.city,
@@ -43,7 +43,7 @@ class EventModel {
       organizerId: data['organizerId'] ?? '',
       venueName: data['venueName']?? '',
       startingPrice: (data['startingPrice'] as num?)?.toDouble() ?? 0.0,
-      imageUrl: data['imageUrl'] ?? '', // image url default isi disini 
+      imageUrl: data['imageUrl'] ?? 'https://doodleipsum.com/700x394/abstract?bg=ffffff&i=08cd64ca3f7dc2ed6292d15bdd6d42c2', // image url default isi disini 
     );
   }
 
