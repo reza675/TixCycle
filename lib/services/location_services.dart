@@ -30,23 +30,33 @@ class LocationServices {
   }
 
   Future<String> getCityFromPosition(Position position) async {
-    try{
-      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+  try {
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
 
-      if(placemarks.isNotEmpty){
-        String? city = placemarks[0].locality;          // kota
-        String? district = placemarks[0].subAdministrativeArea; // kabupaten  
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      String? district = place.subAdministrativeArea; // Nama Kota/Kabupaten
+      String? city = place.locality;                // Nama Kecamatan (atau kadang Kota)
 
-        if(city!=null && city.isNotEmpty){
-          return city;
-        } else if(district!=null && district.isNotEmpty){
-          return district.replaceFirst("Kabupaten ", "");
-        } 
+      if (district != null && district.isNotEmpty) {
+        
+        return district
+            .replaceFirst("Kabupaten ", "")
+            .replaceFirst("Kota ", "");
       }
-      return "kota/kabupaten tidak diketahui";
-    } catch(e){
-      print("Error converting coordinates to city: $e");
-      return "Gagal mendapatkan nama kota/kabupaten";
+      
+      else if (city != null && city.isNotEmpty) {
+        return city;
+      }
+      // -------------------------------
     }
+    return "Lokasi tidak diketahui"; // Fallback jika tidak ada data sama sekali
+  } catch (e) {
+    print("Error converting coordinates to city: $e");
+    return "Gagal mendapatkan lokasi";
   }
+}
 }
