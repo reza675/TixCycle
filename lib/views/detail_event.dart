@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tixcycle/controllers/detail_event_controller.dart';
 import 'package:tixcycle/models/event_model.dart';
+import 'package:tixcycle/routes/app_routes.dart';
 
 class DetailEventPage extends GetView<DetailEventController> {
   const DetailEventPage({super.key});
@@ -237,11 +238,18 @@ class DetailEventPage extends GetView<DetailEventController> {
   }
 
   Widget _beliTiketButton(BuildContext context) {
+    final String? eventId = controller.event.value?.id;
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          if (eventId != null) {
+            Get.toNamed(AppRoutes.BELI_TIKET.replaceAll(':id', eventId));
+          } else {
+            Get.snackbar("Error", "Event ID tidak ditemukan.");
+          }
+        },  
         borderRadius: BorderRadius.circular(30),
         child: Container(
           width: double.infinity,

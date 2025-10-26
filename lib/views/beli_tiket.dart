@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/ticket_controller.dart';
+import '../controllers/beli_tiket_controller.dart';
 import '../models/ticket_model.dart';
+import '../models/cart_item_model.dart';
 
-class BeliTiket extends StatefulWidget {
+class BeliTiket extends GetView<BeliTiketController> {
   const BeliTiket({super.key});
 
-  @override
-  State<BeliTiket> createState() => _BeliTiketState();
-}
-
-class _BeliTiketState extends State<BeliTiket> {
   static const Color c1 = Color(0xFFFFF8E2);
   static const Color c2 = Color(0xFFB3CC86);
   static const Color c3 = Color(0xFF798E5E);
@@ -18,9 +14,6 @@ class _BeliTiketState extends State<BeliTiket> {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller
-    Get.put(TicketController());
-
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -34,9 +27,7 @@ class _BeliTiketState extends State<BeliTiket> {
         body: SafeArea(
           child: Column(
             children: [
-              // Header dengan back button dan title
               _buildHeader(context),
-              // Main content
               Expanded(
                 child: _buildMainContent(),
               ),
@@ -53,7 +44,7 @@ class _BeliTiketState extends State<BeliTiket> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () => Get.back(),
             child: const Icon(
               Icons.arrow_back,
               color: c4,
@@ -67,11 +58,12 @@ class _BeliTiketState extends State<BeliTiket> {
               color: c4,
               fontSize: 28,
               fontWeight: FontWeight.w400,
-              shadows: const [
+              shadows: [
                 Shadow(
-                    blurRadius: 10.0,
-                    color: Colors.black26,
-                    offset: Offset(4, 4)),
+                  blurRadius: 10.0,
+                  color: Colors.black26,
+                  offset: Offset(4, 4),
+                ),
               ],
             ),
           ),
@@ -81,68 +73,63 @@ class _BeliTiketState extends State<BeliTiket> {
   }
 
   Widget _buildMainContent() {
-    final TicketController ticketController = Get.find<TicketController>();
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-    return Obx(() => Container(
-          margin: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: c2, width: 1),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Judul utama
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  'Pilih Tiket Anda',
-                  style: TextStyle(
-                    color: c4,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+      return Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: c2, width: 1),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Pilih Tiket Anda',
+                style: TextStyle(
+                  color: c4,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              // List tiket
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    ...ticketController.availableTickets
-                        .map((ticket) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _buildTicketCard(
-                                ticket,
-                                ticketController,
-                              ),
-                            )),
-                    const SizedBox(height: 20),
-                    // Summary tiket yang dipilih
-                    if (ticketController.selectedTickets.isNotEmpty)
-                      _buildSelectedTicketsSummary(ticketController),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  ...controller.availableTickets.map((ticket) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildTicketCard(ticket),
+                      )),
+                  const SizedBox(height: 20),
+                  if (controller.cartItems.isNotEmpty) _buildCartSummary(),
+                  const SizedBox(height: 20),
+                ],
               ),
-            ],
-          ),
-        ));
+            ),
+          ],
+        ),
+      );
+    });
   }
 
-  Widget _buildTicketCard(
-      TicketModel ticket, TicketController ticketController) {
-    final selectedCount =
-        ticketController.selectedTickets[ticket.categoryName] ?? 0;
-    final isSelected = selectedCount > 0;
+  Widget _buildTicketCard(TicketModel ticket) {
+    final cartItem = controller.cartItems
+        .firstWhereOrNull((item) => item.ticket.id == ticket.id);
+    final isSelected = cartItem != null;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -171,91 +158,67 @@ class _BeliTiketState extends State<BeliTiket> {
                     Text(
                       ticket.categoryName,
                       style: TextStyle(
-                        color: Color(0xFF3F5135),
+                        color: c4,
                         fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        shadows: const [
-                          Shadow(
-                              blurRadius: 10.0,
-                              color: Colors.black26,
-                              offset: Offset(4, 4)),
-                        ],
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      ticketController.formatPrice(ticket.price),
-                      style: const TextStyle(
-                          color: Color(0xFF314417),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800),
+                      'Rp ${ticket.price.toStringAsFixed(0)}',
+                      style: TextStyle(
+                        color: c4.withOpacity(0.8),
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
               ),
-              // Tombol yang responsif
               Row(
                 children: [
                   if (isSelected) ...[
-                    // Tombol minus
                     GestureDetector(
-                      onTap: () =>
-                          ticketController.removeTicket(ticket.categoryName),
+                      onTap: () {
+                        if (cartItem != null) {
+                          controller.removeTicketFromCart(cartItem);
+                        }
+                      },
                       child: Container(
-                        width: 32,
-                        height: 32,
+                        padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
                           color: c2,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: c2, width: 1),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Icon(
                           Icons.remove,
                           color: Colors.white,
-                          size: 16,
+                          size: 18,
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Jumlah tiket
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: c1,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: c2, width: 1),
-                      ),
-                      child: Text(
-                        '$selectedCount',
-                        style: TextStyle(
-                          color: c4,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                    Obx(() => Text(
+                          cartItem != null ? '${cartItem.quantity.value}' : '0',
+                          style: TextStyle(
+                            color: c4,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )),
                     const SizedBox(width: 8),
                   ],
-                  // Tombol plus/tambah
                   GestureDetector(
-                    onTap: () =>
-                        ticketController.addTicket(ticket.categoryName),
+                    onTap: () => controller.addTicketToCart(ticket),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: isSelected ? c2 : Colors.white,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: c2, width: 1),
+                        color: c2,
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
-                        isSelected ? '+' : 'Tambah',
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : c4,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 18,
                       ),
                     ),
                   ),
@@ -272,132 +235,115 @@ class _BeliTiketState extends State<BeliTiket> {
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {
-              // isi apayah bang wkwk
-            },
-            child: Text(
-              'Tampilkan Lebih banyak',
-              style: TextStyle(
-                color: c2,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  // Widget  menampilkan summary tiket yang dipilih
-  Widget _buildSelectedTicketsSummary(TicketController ticketController) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: c1,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: c2, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Tiket yang Dipilih:',
-            style: TextStyle(
-              color: c4,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
+  Widget _buildCartSummary() {
+    return Obx(() => Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: c1,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: c2, width: 1),
           ),
-          const SizedBox(height: 12),
-          // List tiket yang dipilih
-          ...ticketController.selectedTickets.entries.map((entry) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tiket yang Dipilih:',
+                style: TextStyle(
+                  color: c4,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...controller.cartItems
+                  .map((item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${item.ticket.categoryName} (${item.quantity.value}x)',
+                              style: TextStyle(
+                                color: c4,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              'Rp ${(item.ticket.price * item.quantity.value).toStringAsFixed(0)}',
+                              style: TextStyle(
+                                color: c4,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+              const Divider(color: c2, thickness: 1),
+              const SizedBox(height: 8),
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${entry.key}',
+                    'Total :',
                     style: TextStyle(
                       color: c4,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    '${entry.value}x',
+                    'Rp ${controller.totalPrice.value.toStringAsFixed(0)}',
                     style: TextStyle(
                       color: c4,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-            );
-          }).toList(),
-          const Divider(color: c2, thickness: 1),
-          const SizedBox(height: 8),
-          // Total harga
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total :',
-                style: TextStyle(
-                  color: c4,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                ticketController
-                    .formatPrice(ticketController.getTotalPrice().toDouble()),
-                style: TextStyle(
-                  color: c4,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (controller.cartItems.isEmpty) {
+                      Get.snackbar(
+                        'Error',
+                        'Silakan pilih tiket terlebih dahulu',
+                        backgroundColor: c2.withOpacity(0.8),
+                        colorText: Colors.white,
+                      );
+                      return;
+                    }
+                    // TODO: Implement checkout logic
+                    Get.toNamed('/checkout');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: c2,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Lanjutkan',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // Tombol Lanjutkan
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                        'Total: ${ticketController.formatPrice(ticketController.getTotalPrice().toDouble())}'),
-                    backgroundColor: c2,
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: c2,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-              child: const Text(
-                'Lanjutkan',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }

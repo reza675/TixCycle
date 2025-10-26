@@ -255,8 +255,6 @@ class _BerandaPageState extends State<BerandaPage> {
                   GestureDetector(
                     onTap: () {
                       controller.filterByCity(cityName);
-
-                      
                     },
                     child: Container(
                       width: 56,
@@ -306,7 +304,7 @@ class _BerandaPageState extends State<BerandaPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: c1,
+        color: Colors.brown[50],
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
@@ -317,7 +315,8 @@ class _BerandaPageState extends State<BerandaPage> {
         ],
       ),
       child: InkWell(
-        onTap: () => Get.toNamed('${AppRoutes.LIHAT_TIKET}/${event.id}'),
+        onTap: () =>
+            Get.toNamed(AppRoutes.LIHAT_TIKET.replaceAll(':id', event.id)),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
