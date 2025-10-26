@@ -11,19 +11,9 @@ class AppPages {
   // rute/halaman pertama (nanti diganti splash)
   static const INITIAL = AppRoutes.BERANDA;
   static final routes = [
-    GetPage(
-        name: AppRoutes.BERANDA,
-        page: () => const BerandaPage(),
-        binding: BerandaBinding()), // beranda
-    GetPage(
-        name: '${AppRoutes.LIHAT_TIKET}/:id',
-        page: () => const DetailEventPage(),
-        binding: DetailEventBinding()), // detail event
-    GetPage(
-        name: AppRoutes.PENCARIAN_TIKET,
-        page: () => const PencarianTiketPage()), // pencarian tiket
-    GetPage(
-        name: AppRoutes.BELI_TIKET,
-        page: () => const BeliTiket()), // beli tiket
+    GetPage(name: AppRoutes.BERANDA, page: ()=> const BerandaPage(), binding: BerandaBinding()),    // beranda
+    GetPage(name: AppRoutes.LIHAT_TIKET, page: ()=> const LihatTiketPage(), binding: DetailEventBinding()), // lihat tiket
+    GetPage(name: AppRoutes.PENCARIAN_TIKET, page: ()=> const PencarianTiketPage()), // pencarian tiket
+    GetPage(name: AppRoutes.BELI_TIKET, page: ()=> const BeliTiket(), binding: DetailEventBinding()), // beli tiket
   ];
 }
