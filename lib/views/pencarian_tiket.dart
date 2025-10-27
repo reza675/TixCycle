@@ -4,6 +4,7 @@ import '../controllers/beranda_controller.dart';
 import '../models/event_model.dart';
 import '../routes/app_routes.dart';
 
+
 class PencarianTiketPage extends StatefulWidget {
   final String? initialQuery;
 
@@ -15,8 +16,7 @@ class PencarianTiketPage extends StatefulWidget {
 
 class _PencarianTiketPageState extends State<PencarianTiketPage> {
   late final TextEditingController _searchController;
-  // late final SearchController searchController; // Diganti
-  late final BerandaController searchController; // Diganti
+  late final BerandaController searchController; 
 
   static const Color c1 = Color(0xFFFFF8E2);
   static const Color c2 = Color(0xFFB3CC86);
@@ -27,14 +27,11 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.initialQuery ?? '');
-    // searchController = Get.put(SearchController()); // Diganti
     searchController = Get.find<BerandaController>(); // Diganti (mengambil controller yang sudah ada)
     
     if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
-      // searchController.setSearchQuery(widget.initialQuery!); // Diganti
-      searchController.onSearchQueryChanged(widget.initialQuery!); // Diganti
+      searchController.onSearchQueryChanged(widget.initialQuery!); 
     } else {
-      // Pastikan search query di controller beranda kosong saat masuk halaman ini
       searchController.onSearchQueryChanged('');
     }
   }
@@ -42,7 +39,6 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
   @override
   void dispose() {
     _searchController.dispose();
-    // Kosongkan query pencarian di BerandaController saat keluar
     searchController.onSearchQueryChanged('');
     super.dispose();
   }
@@ -123,12 +119,10 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
                 contentPadding: EdgeInsets.zero,
               ),
               onChanged: (value) {
-                // searchController.setSearchQuery(value); // Diganti
-                searchController.onSearchQueryChanged(value); // Diganti
+                searchController.onSearchQueryChanged(value); 
               },
               onSubmitted: (value) {
-                // searchController.setSearchQuery(value); // Diganti
-                searchController.onSearchQueryChanged(value); // Diganti
+                searchController.onSearchQueryChanged(value); 
               },
             ),
           ),
@@ -136,21 +130,11 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
             GestureDetector(
               onTap: () {
                 _searchController.clear();
-                // searchController.clearSearch(); // Diganti
-                searchController.onSearchQueryChanged(""); // Diganti
+                searchController.onSearchQueryChanged("");
               },
               child: const Icon(Icons.clear, color: Colors.black54, size: 20),
             ),
           const SizedBox(width: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: c1,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: c3, width: 1),
-            ),
-            padding: const EdgeInsets.all(6),
-            child: const Icon(Icons.tune, color: Colors.black87, size: 20),
-          ),
         ],
       ),
     );
@@ -169,7 +153,7 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
       }
 
       // if (searchController.searchResults.isEmpty) { // Diganti
-      if (searchController.recommendedEvents.isEmpty) { // Diganti
+      if (searchController.recommendedEvents.isEmpty) { 
         return _buildNoResultsState();
       }
 
@@ -286,7 +270,7 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
       child: InkWell(
         onTap: () {
           // Navigasi ke halaman detail event
-          Get.toNamed('${AppRoutes.BERANDA}${AppRoutes.LIHAT_TIKET}/${event.id}');
+          Get.toNamed(AppRoutes.LIHAT_TIKET.replaceAll(':id', event.id));
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tixcycle/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:tixcycle/controllers/beranda_controller.dart';
 import 'package:tixcycle/models/event_model.dart';
@@ -571,30 +572,35 @@ class _BerandaPageState extends State<BerandaPage> {
     );
   }
 
+
   Widget _buildSearchbar(BerandaController controller) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: TextField(
-        onChanged: (value) => controller.onSearchQueryChanged(value),
-        decoration: InputDecoration(
-          hintText: "Cari event atau kota...",
-          prefixIcon: Icon(Icons.search, color: c4),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.9),
-          border: OutlineInputBorder(
+      child: GestureDetector(
+        onTap: () {
+          Get.toNamed(AppRoutes.PENCARIAN_TIKET);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
             borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: c3, width: 1),
+            border: Border.all(color: c3, width: 1),
+            boxShadow: const [
+              BoxShadow(
+                  color: Colors.black12, blurRadius: 4, offset: Offset(0, 1)),
+            ],
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: c3, width: 1),
+          child: Row(
+            children: [
+              Icon(Icons.search, color: c4),
+              const SizedBox(width: 8),
+              Text(
+                "Cari event atau kota...",
+                style: TextStyle(color: c4.withOpacity(0.7)),
+              ),
+            ],
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: c4, width: 2),
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         ),
       ),
     );
