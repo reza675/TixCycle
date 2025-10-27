@@ -202,14 +202,15 @@ class _BerandaPageState extends State<BerandaPage> {
     });
   }
 
-  // lib/views/beranda.dart
-
   Widget _buildBannerCard() {
     final BerandaController controller = Get.find<BerandaController>();
     return Obx(() {
       final featured = controller.featuredEvents;
+      
+      // Tetap siapkan fallback jika featuredEvents kosong
       final List<String> fallbackImages = _carouselImages;
       final bool hasFeaturedEvents = featured.isNotEmpty;
+      // Tentukan jumlah item berdasarkan apakah event unggulan ada atau tidak
       final int itemCount = hasFeaturedEvents ? featured.length : fallbackImages.length;
 
       if (itemCount == 0) {
@@ -250,8 +251,9 @@ class _BerandaPageState extends State<BerandaPage> {
                   onPageChanged: (index) =>
                       setState(() => _currentCarouselIndex = index),
                   itemBuilder: (context, idx) {
+                    
                     String imageUrl;
-                    EventModel? event; 
+                    EventModel? event; // Event bisa null jika kita pakai fallback
 
                     if (hasFeaturedEvents) {
                       event = featured[idx];
@@ -262,6 +264,7 @@ class _BerandaPageState extends State<BerandaPage> {
                     }
                     
                     final bool isNetwork = imageUrl.startsWith('http');
+
                     final imageWidget = isNetwork
                         ? Image.network(
                             imageUrl,
@@ -283,7 +286,6 @@ class _BerandaPageState extends State<BerandaPage> {
                                   child: Icon(Icons.image_not_supported)),
                             ),
                           );
-
                     return GestureDetector(
                       onTap: () {
                         if (event != null) {
@@ -305,7 +307,7 @@ class _BerandaPageState extends State<BerandaPage> {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(itemCount, (entry) {
+            children: List.generate(itemCount, (entry) { 
               return Container(
                 width: _currentCarouselIndex == entry ? 10 : 8,
                 height: _currentCarouselIndex == entry ? 10 : 8,
@@ -338,7 +340,7 @@ class _BerandaPageState extends State<BerandaPage> {
           child: Text(
             'Belum ada lokasi tersedia',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14, 
               fontWeight: FontWeight.w500,
               color: c4,
             ),
@@ -347,70 +349,122 @@ class _BerandaPageState extends State<BerandaPage> {
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: c1.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 2)),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: controller.cityEvents.map((cityMap) {
-            String cityName = cityMap.keys.first;
-            EventModel event = cityMap.values.first;
+    // Bungkus dengan Obx agar UI ter-update saat selectedCity berubah
+    return Obx(() => Container(
+          decoration: BoxDecoration(
+            color: c1.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: const [
+              BoxShadow(
+                  color: Colors.black26, blurRadius: 4, offset: Offset(0, 1)),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildCityButton(
+                  controller: controller,
+                  cityName: "",
+                  imageUrl: 'images/beranda/tampilan1.jpg',
+                  isAsset: true, 
+                ),
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      controller.filterByCity(cityName);
-                    },
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: c3, width: 2),
-                      ),
-                      child: ClipOval(
-                        child: Image.network(
-                          event.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                            color: Colors.grey[200],
-                            child: const Icon(Icons.location_city, color: c3),
-                          ),
+                ...controller.cityEvents.map((cityMap) {
+                  String cityName = cityMap.keys.first;
+                  EventModel event = cityMap.values.first;
+
+                  return _buildCityButton(
+                    controller: controller,
+                    cityName: cityName,
+                    imageUrl: event.imageUrl,
+                    isAsset: false, // Ini dari network
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
+        ));
+  }
+
+  Widget _buildCityButton({
+    required BerandaController controller,
+    required String cityName,
+    required String imageUrl,
+    bool isAsset = false,
+  }) {
+    // Tentukan apakah tombol ini sedang aktif
+    final bool isActive = (cityName.isEmpty && controller.selectedCity.value == null) ||
+                          (controller.selectedCity.value == cityName);
+    
+    final String label = cityName.isEmpty ? "Semua" : cityName;
+
+    return Padding(
+     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () {
+              controller.filterByCity(cityName);
+            },
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                // Beri border berbeda jika aktif
+                border: Border.all(
+                  color: isActive ? c4.withOpacity(0.8) : c3,
+                  width: isActive ? 3 : 2,
+                ),
+                boxShadow: isActive ? [ 
+                  BoxShadow(
+                    color: c4.withOpacity(0.5),
+                    blurRadius: 6,
+                    spreadRadius: 1
+                  )
+                ] : [],
+              ),
+              child: ClipOval(
+                child: isAsset
+                    ? Image.asset(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.public, color: c3),
+                        ),
+                      )
+                    : Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.location_city, color: c3),
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SizedBox(
-                    width: 72,
-                    child: Text(
-                      cityName,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: c4,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                ],
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          SizedBox(
+            width: 72,
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                color: c4,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+        ],
       ),
     );
   }

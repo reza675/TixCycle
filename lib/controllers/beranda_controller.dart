@@ -29,6 +29,8 @@ class BerandaController extends GetxController {
   var searchQuery = ''.obs;
   var isSearchActive = false.obs;
 
+  var selectedCity = Rx<String?>(null);
+
   @override
   void onInit() {
     super.onInit();
@@ -71,15 +73,28 @@ class BerandaController extends GetxController {
 
   // Method baru untuk filter berdasarkan kota
   void filterByCity(String cityName) {
-    if (cityName.isEmpty) {
+    // Jika menekan kota yang sudah aktif, batalkan filter
+    if (cityName == selectedCity.value && cityName.isNotEmpty) {
+      selectedCity.value = null;
       isSearchActive(false);
       recommendedEvents.assignAll(_unfilteredRecommendedEvents);
     } else {
-      isSearchActive(true);
-      final results = _unfilteredRecommendedEvents
-          .where((event) => event.city.toLowerCase() == cityName.toLowerCase())
-          .toList();
-      recommendedEvents.assignAll(results);
+      if (cityName.isNotEmpty) {
+        searchQuery.value = '';
+      }
+      
+      selectedCity.value = cityName.isEmpty ? null : cityName;
+
+      if (cityName.isEmpty) {
+        isSearchActive(false);
+        recommendedEvents.assignAll(_unfilteredRecommendedEvents);
+      } else {
+        isSearchActive(true);
+        final results = _unfilteredRecommendedEvents
+            .where((event) => event.city.toLowerCase() == cityName.toLowerCase())
+            .toList();
+        recommendedEvents.assignAll(results);
+      }
     }
   }
 
@@ -88,6 +103,10 @@ class BerandaController extends GetxController {
   }
 
   void _performSearch(String query) {
+    if (query.isNotEmpty) {
+      selectedCity.value = null;
+    }
+
     if (query.isEmpty) {
       isSearchActive(false);
       recommendedEvents.assignAll(_unfilteredRecommendedEvents);
