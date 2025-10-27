@@ -127,10 +127,6 @@ class BeliTiket extends GetView<BeliTiketController> {
   }
 
   Widget _buildTicketCard(TicketModel ticket) {
-    final cartItem = controller.cartItems
-        .firstWhereOrNull((item) => item.ticket.id == ticket.id);
-    final isSelected = cartItem != null;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -164,6 +160,7 @@ class BeliTiket extends GetView<BeliTiketController> {
                       ),
                     ),
                     const SizedBox(height: 4),
+                    
                     Text(
                       'Rp ${ticket.price.toStringAsFixed(0)}',
                       style: TextStyle(
@@ -174,63 +171,90 @@ class BeliTiket extends GetView<BeliTiketController> {
                   ],
                 ),
               ),
-              Row(
-                children: [
-                  if (isSelected) ...[
-                    GestureDetector(
-                      onTap: () {
-                        if (cartItem != null) {
-                          controller.removeTicketFromCart(cartItem);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: c2,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Icon(
-                          Icons.remove,
-                          color: Colors.white,
-                          size: 18,
-                        ),
+
+              Obx(() {
+                final cartItem = controller.cartItems
+                    .firstWhereOrNull((item) => item.ticket.id == ticket.id);
+                final isSelected = cartItem != null;
+                final int currentQuantity = cartItem?.quantity.value ?? 0;
+                final int remainingStock = ticket.stock - currentQuantity;
+                final bool isStockAvailable = currentQuantity < ticket.stock;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      isSelected ? 'Sisa: $remainingStock' : 'Stok: ${ticket.stock}',
+                      style: TextStyle(
+                        color: remainingStock > 0 ? c3 : Colors.red,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Obx(() => Text(
-                          cartItem != null ? '${cartItem.quantity.value}' : '0',
-                          style: TextStyle(
-                            color: c4,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                    const SizedBox(height: 8),
+
+                    Row(
+                      children: [
+                        if (isSelected) ...[
+                          GestureDetector(
+                            onTap: () {
+                              if (cartItem != null) {
+                                controller.removeTicketFromCart(cartItem);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: c2,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Icon(
+                                Icons.remove,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
                           ),
-                        )),
-                    const SizedBox(width: 8),
-                  ],
-                  GestureDetector(
-                    onTap: () => controller.addTicketToCart(ticket),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: c2,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '$currentQuantity',
+                            style: TextStyle(
+                              color: c4,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        GestureDetector(
+                          onTap: isStockAvailable
+                              ? () => controller.addTicketToCart(ticket)
+                              : null,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: isStockAvailable ? c2 : Colors.grey[400],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              }),
             ],
           ),
           const SizedBox(height: 12),
           if (ticket.description != null && ticket.description!.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
-              ticket.description!, 
+              ticket.description!,
               style: const TextStyle(
                 color: Colors.black87,
                 fontSize: 12,
@@ -242,7 +266,6 @@ class BeliTiket extends GetView<BeliTiketController> {
       ),
     );
   }
-
   Widget _buildCartSummary() {
     return Obx(() => Container(
           padding: const EdgeInsets.all(16),

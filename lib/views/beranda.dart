@@ -129,7 +129,7 @@ class _BerandaPageState extends State<BerandaPage> {
               margin: const EdgeInsets.only(bottom: 0),
               constraints: BoxConstraints(
                 minHeight: MediaQuery.of(context).size.height -
-                    100, // Mengurangi tinggi untuk bottom nav
+                    100, 
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,15 +202,17 @@ class _BerandaPageState extends State<BerandaPage> {
     });
   }
 
+  // lib/views/beranda.dart
+
   Widget _buildBannerCard() {
     final BerandaController controller = Get.find<BerandaController>();
     return Obx(() {
       final featured = controller.featuredEvents;
-      final List<String> images = featured.isNotEmpty
-          ? featured.map((e) => e.imageUrl).toList()
-          : _carouselImages;
+      final List<String> fallbackImages = _carouselImages;
+      final bool hasFeaturedEvents = featured.isNotEmpty;
+      final int itemCount = hasFeaturedEvents ? featured.length : fallbackImages.length;
 
-      if (images.isEmpty) {
+      if (itemCount == 0) {
         return Container(
           height: MediaQuery.of(context).size.width * (7 / 16),
           decoration: BoxDecoration(
@@ -244,35 +246,56 @@ class _BerandaPageState extends State<BerandaPage> {
                 height: MediaQuery.of(context).size.width * (7 / 16),
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: images.length,
+                  itemCount: itemCount,
                   onPageChanged: (index) =>
                       setState(() => _currentCarouselIndex = index),
                   itemBuilder: (context, idx) {
-                    final src = images[idx];
-                    final bool isNetwork = src.startsWith('http');
-                    return AspectRatio(
-                      aspectRatio: 16 / 7,
-                      child: isNetwork
-                          ? Image.network(
-                              src,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              errorBuilder: (c, e, s) => Container(
-                                color: Colors.grey[200],
-                                child: const Center(
-                                    child: Icon(Icons.image_not_supported)),
-                              ),
-                            )
-                          : Image.asset(
-                              src,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              errorBuilder: (c, e, s) => Container(
-                                color: Colors.grey[200],
-                                child: const Center(
-                                    child: Icon(Icons.image_not_supported)),
-                              ),
+                    String imageUrl;
+                    EventModel? event; 
+
+                    if (hasFeaturedEvents) {
+                      event = featured[idx];
+                      imageUrl = event.imageUrl;
+                    } else {
+                      imageUrl = fallbackImages[idx];
+                      event = null; 
+                    }
+                    
+                    final bool isNetwork = imageUrl.startsWith('http');
+                    final imageWidget = isNetwork
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            errorBuilder: (c, e, s) => Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                  child: Icon(Icons.image_not_supported)),
                             ),
+                          )
+                        : Image.asset(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            errorBuilder: (c, e, s) => Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                  child: Icon(Icons.image_not_supported)),
+                            ),
+                          );
+
+                    return GestureDetector(
+                      onTap: () {
+                        if (event != null) {
+                          Get.toNamed(
+                              AppRoutes.LIHAT_TIKET.replaceAll(':id', event.id)
+                          );
+                        }
+                      },
+                      child: AspectRatio(
+                        aspectRatio: 16 / 7,
+                        child: imageWidget,
+                      ),
                     );
                   },
                 ),
@@ -280,18 +303,16 @@ class _BerandaPageState extends State<BerandaPage> {
             ),
           ),
           const SizedBox(height: 8),
-          // Dots indicator
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: images.asMap().entries.map((entry) {
-              final idx = entry.key;
+            children: List.generate(itemCount, (entry) {
               return Container(
-                width: _currentCarouselIndex == idx ? 10 : 8,
-                height: _currentCarouselIndex == idx ? 10 : 8,
+                width: _currentCarouselIndex == entry ? 10 : 8,
+                height: _currentCarouselIndex == entry ? 10 : 8,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _currentCarouselIndex == idx ? c2 : Colors.grey[300],
+                  color: _currentCarouselIndex == entry ? c2 : Colors.grey[300],
                 ),
               );
             }).toList(),
