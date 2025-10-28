@@ -170,7 +170,7 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
             ),
           ),
           const SizedBox(height: 12),
-          // ...searchController.searchResults // Diganti
+          // ...searchController.searchResults 
           ...searchController.recommendedEvents // Diganti
               .map((event) => _buildEventCard(event))
               .toList(),
