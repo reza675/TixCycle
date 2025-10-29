@@ -521,6 +521,7 @@ class _BerandaPageState extends State<BerandaPage> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: TextField(
+        onTap: ()=>Get.toNamed(AppRoutes.PENCARIAN_TIKET),
         onChanged: (value) => controller.onSearchQueryChanged(value),
         decoration: InputDecoration(
           hintText: "Cari event atau kota...",

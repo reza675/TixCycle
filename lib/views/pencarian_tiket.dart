@@ -26,6 +26,7 @@ class _PencarianTiketPageState extends State<PencarianTiketPage> {
   @override
   void initState() {
     super.initState();
+
     _searchController = TextEditingController(text: widget.initialQuery ?? '');
     // searchController = Get.put(SearchController()); // Diganti
     searchController = Get.find<BerandaController>(); // Diganti (mengambil controller yang sudah ada)
