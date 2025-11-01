@@ -22,11 +22,13 @@ class LoginController extends GetxController{
   Future<void> signInWithEmailPassword() async{
     
     if(_formKey.currentState?.validate() ?? false){
-      isLoading(true);
-      final String email = emailController.text.trim();
-      final String password = passwordController.text.trim();
 
       try{
+
+        isLoading(true);
+        final String email = emailController.text.trim();
+        final String password = passwordController.text.trim();
+        
         await _authRepository.signIn(email, password);
         Get.offAllNamed(AppRoutes.BERANDA);
       } on FirebaseAuthException catch (e){
