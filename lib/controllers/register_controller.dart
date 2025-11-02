@@ -32,7 +32,15 @@ class RegisterController extends GetxController{
         isLoading(true);
         await _authRepository.signUp(username: usernameController.text.trim(), password: passwordController.text.trim(), displayName: displayNameController.text.trim(), email: emailController.text.trim());
 
-        Get.offAllNamed(AppRoutes.BERANDA);
+        Get.offNamed(AppRoutes.LOGIN);
+        Get.snackbar(
+          "Registrasi Berhasil", 
+          "Akun anda berhasil dibuat. Silakan login.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 4),
+        );
 
       } on FirebaseAuthException catch(e){
         Get.snackbar("Registrasi Gagal",
@@ -52,7 +60,7 @@ class RegisterController extends GetxController{
     }
   }
 
-  void togglePAsswordVisibility(){
+  void togglePasswordVisibility(){
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 

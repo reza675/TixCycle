@@ -10,7 +10,7 @@ class LoginController extends GetxController{
 
   LoginController(this._authRepository);
 
-  final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
   var isPasswordVisible = false.obs;
   var isLoading = false.obs;
@@ -21,7 +21,7 @@ class LoginController extends GetxController{
 
   Future<void> signInWithEmailPassword() async{
     
-    if(_formKey.currentState?.validate() ?? false){
+    if(formKey.currentState?.validate() ?? false){
 
       try{
 
@@ -66,7 +66,7 @@ class LoginController extends GetxController{
     }
   }
 
-  void changePAsswordVisibility(){    // pakai di tombol mata (password visible/invisible)
+void togglePasswordVisibility(){
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
