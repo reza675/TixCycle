@@ -18,5 +18,6 @@ class AppPages {
     GetPage(name: AppRoutes.PENCARIAN_TIKET, page: ()=> const PencarianTiketPage()), // pencarian tiket
     GetPage(name: AppRoutes.BELI_TIKET, page: ()=> const BeliTiket(), binding: BeliTiketBinding()), // beli tiket
     // GetPage(name: AppRoutes.LOGIN, page: ()=> const LoginPage(), binding: LoginBinding()),  // uncomment & ganti bagian page ke halaman login jika udah ada
+    // GetPage(name: AppRoutes.REGISTER, page: ()=> const RegisterPage(), binding: RegisterBinding()),  // uncomment & ganti bagian page ke halaman register jika udah ada
   ];
 }
