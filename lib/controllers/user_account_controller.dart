@@ -22,7 +22,7 @@ class UserAccountController extends GetxController {
     ever(firebaseUser, _handleAuthChanged);
   }
 
-  void _handleAuthChanged(User? user) async {
+  void _handleAuthChanged(User? user) async {   // ketika status autentikasi berubah
     if (user != null) {
       try {
         isLoading(true);
