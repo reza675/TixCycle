@@ -35,10 +35,6 @@ class UserAccountController extends GetxController {
       }
     } else {
       userProfile.value = null;
-      // Fitur login belum tersedia, jadi hanya tampilkan info
-      Get.snackbar("Info",
-          "Anda belum login. Fitur login akan tersedia di update berikutnya.");
-      //Get.offAllNamed('/isi pake nama halaman login');
     }
   }
 

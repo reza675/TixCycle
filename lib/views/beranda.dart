@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tixcycle/models/user_model.dart';
 import 'package:tixcycle/routes/app_routes.dart';
 import 'package:get/get.dart';
 import 'package:tixcycle/controllers/beranda_controller.dart';
 import 'package:tixcycle/models/event_model.dart';
-import 'package:tixcycle/routes/app_routes.dart';
 import 'package:tixcycle/views/widgets/bottom_bar.dart';
-// using Flutter's built-in PageView instead of external carousel package to avoid
-// conflicts with Flutter SDK's CarouselController
+import 'package:tixcycle/controllers/user_account_controller.dart';
 
 class BerandaPage extends StatefulWidget {
   const BerandaPage({super.key});
@@ -20,7 +19,7 @@ class _BerandaPageState extends State<BerandaPage> {
 
   int _currentCarouselIndex = 0;
   final List<String> _carouselImages = [
-    'images/beranda/tampilan1.jpg', 
+    'images/beranda/tampilan1.jpg',
     'images/beranda/tampilan2.png',
     'images/beranda/tampilan3.png',
   ];
@@ -29,6 +28,23 @@ class _BerandaPageState extends State<BerandaPage> {
   static const Color c2 = Color(0xFFB3CC86);
   static const Color c3 = Color(0xFF798E5E);
   static const Color c4 = Color(0xFF3F5135);
+
+  void _handleNavigation(int index) {
+    final userAccountController = Get.find<UserAccountController>();
+    final bool isLoggedIn = userAccountController.firebaseUser.value != null;
+
+    final halamanIndeks = [1, 2, 3, 4];
+    if (halamanIndeks.contains(index) && !isLoggedIn) {
+      Get.toNamed(AppRoutes.LOGIN);
+      return;
+    }
+    else {
+      setState(() {
+        currentIndex = index;
+      });
+      
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +67,11 @@ class _BerandaPageState extends State<BerandaPage> {
         ),
         bottomNavigationBar: CurvedBottomBar(
           currentIndex: currentIndex,
-          onTap: (i) => setState(() => currentIndex = i),
+          onTap: (i) => _handleNavigation(i),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: CenterActionButton(
-          onPressed: () => setState(() => currentIndex = 2),
+          onPressed: () => _handleNavigation(2),
         ),
       ),
     );
@@ -74,10 +90,17 @@ class _BerandaPageState extends State<BerandaPage> {
   }
 
   Widget _buildBody(BuildContext context, BerandaController controller) {
-    // Gunakan tampilan seperti `beranda_old.dart` tetapi tetap terhubung ke controller
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
+      }
+      final UserAccountController userAccountController = Get.find<UserAccountController>();
+      final UserModel? userProfile = userAccountController.userProfile.value;
+      String displayName;
+      if (userProfile != null && userProfile.username.isNotEmpty) {
+        displayName = userProfile.username; //
+      } else {
+        displayName = "Greenies"; // Fallback jika (belum login) 
       }
 
       return SingleChildScrollView(
@@ -90,7 +113,7 @@ class _BerandaPageState extends State<BerandaPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Center(
                 child: Text(
-                  'Hello, Greenies',
+                  'Hello, $displayName!',
                   style: TextStyle(
                     color: const Color(0xFF314417),
                     fontSize: 28,
@@ -109,6 +132,17 @@ class _BerandaPageState extends State<BerandaPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _buildSearchbar(controller),
+            ),
+
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red[300]),
+                child: const Text("!! LOGOUT (DEBUG) !!", style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  // Panggil method signOut dari controller
+                  Get.find<UserAccountController>().signOut();
+                },
+              ),
             ),
             const SizedBox(height: 16),
             Container(
@@ -129,8 +163,7 @@ class _BerandaPageState extends State<BerandaPage> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               margin: const EdgeInsets.only(bottom: 0),
               constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height -
-                    100, 
+                minHeight: MediaQuery.of(context).size.height - 100,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,12 +240,13 @@ class _BerandaPageState extends State<BerandaPage> {
     final BerandaController controller = Get.find<BerandaController>();
     return Obx(() {
       final featured = controller.featuredEvents;
-      
+
       // Tetap siapkan fallback jika featuredEvents kosong
       final List<String> fallbackImages = _carouselImages;
       final bool hasFeaturedEvents = featured.isNotEmpty;
       // Tentukan jumlah item berdasarkan apakah event unggulan ada atau tidak
-      final int itemCount = hasFeaturedEvents ? featured.length : fallbackImages.length;
+      final int itemCount =
+          hasFeaturedEvents ? featured.length : fallbackImages.length;
 
       if (itemCount == 0) {
         return Container(
@@ -252,18 +286,18 @@ class _BerandaPageState extends State<BerandaPage> {
                   onPageChanged: (index) =>
                       setState(() => _currentCarouselIndex = index),
                   itemBuilder: (context, idx) {
-                    
                     String imageUrl;
-                    EventModel? event; // Event bisa null jika kita pakai fallback
+                    EventModel?
+                        event; // Event bisa null jika kita pakai fallback
 
                     if (hasFeaturedEvents) {
                       event = featured[idx];
                       imageUrl = event.imageUrl;
                     } else {
                       imageUrl = fallbackImages[idx];
-                      event = null; 
+                      event = null;
                     }
-                    
+
                     final bool isNetwork = imageUrl.startsWith('http');
 
                     final imageWidget = isNetwork
@@ -290,9 +324,8 @@ class _BerandaPageState extends State<BerandaPage> {
                     return GestureDetector(
                       onTap: () {
                         if (event != null) {
-                          Get.toNamed(
-                              AppRoutes.LIHAT_TIKET.replaceAll(':id', event.id)
-                          );
+                          Get.toNamed(AppRoutes.LIHAT_TIKET
+                              .replaceAll(':id', event.id));
                         }
                       },
                       child: AspectRatio(
@@ -308,7 +341,7 @@ class _BerandaPageState extends State<BerandaPage> {
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(itemCount, (entry) { 
+            children: List.generate(itemCount, (entry) {
               return Container(
                 width: _currentCarouselIndex == entry ? 10 : 8,
                 height: _currentCarouselIndex == entry ? 10 : 8,
@@ -341,7 +374,7 @@ class _BerandaPageState extends State<BerandaPage> {
           child: Text(
             'Belum ada lokasi tersedia',
             style: TextStyle(
-              fontSize: 14, 
+              fontSize: 14,
               fontWeight: FontWeight.w500,
               color: c4,
             ),
@@ -369,9 +402,8 @@ class _BerandaPageState extends State<BerandaPage> {
                   controller: controller,
                   cityName: "",
                   imageUrl: 'images/beranda/tampilan1.jpg',
-                  isAsset: true, 
+                  isAsset: true,
                 ),
-
                 ...controller.cityEvents.map((cityMap) {
                   String cityName = cityMap.keys.first;
                   EventModel event = cityMap.values.first;
@@ -396,13 +428,14 @@ class _BerandaPageState extends State<BerandaPage> {
     bool isAsset = false,
   }) {
     // Tentukan apakah tombol ini sedang aktif
-    final bool isActive = (cityName.isEmpty && controller.selectedCity.value == null) ||
-                          (controller.selectedCity.value == cityName);
-    
+    final bool isActive =
+        (cityName.isEmpty && controller.selectedCity.value == null) ||
+            (controller.selectedCity.value == cityName);
+
     final String label = cityName.isEmpty ? "Semua" : cityName;
 
     return Padding(
-     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Column(
         children: [
           GestureDetector(
@@ -419,21 +452,21 @@ class _BerandaPageState extends State<BerandaPage> {
                   color: isActive ? c4.withOpacity(0.8) : c3,
                   width: isActive ? 3 : 2,
                 ),
-                boxShadow: isActive ? [ 
-                  BoxShadow(
-                    color: c4.withOpacity(0.5),
-                    blurRadius: 6,
-                    spreadRadius: 1
-                  )
-                ] : [],
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                            color: c4.withOpacity(0.5),
+                            blurRadius: 6,
+                            spreadRadius: 1)
+                      ]
+                    : [],
               ),
               child: ClipOval(
                 child: isAsset
                     ? Image.asset(
                         imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(
+                        errorBuilder: (context, error, stackTrace) => Container(
                           color: Colors.grey[200],
                           child: const Icon(Icons.public, color: c3),
                         ),
@@ -441,8 +474,7 @@ class _BerandaPageState extends State<BerandaPage> {
                     : Image.network(
                         imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Container(
+                        errorBuilder: (context, error, stackTrace) => Container(
                           color: Colors.grey[200],
                           child: const Icon(Icons.location_city, color: c3),
                         ),
@@ -571,7 +603,6 @@ class _BerandaPageState extends State<BerandaPage> {
       ),
     );
   }
-
 
   Widget _buildSearchbar(BerandaController controller) {
     return Padding(
