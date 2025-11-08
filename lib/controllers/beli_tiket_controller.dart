@@ -72,4 +72,8 @@ class BeliTiketController extends GetxController {
       cartItems.remove(cartItem);
     }
   }
+
+  void clearCart() {
+    cartItems.clear();
+  }
 }
