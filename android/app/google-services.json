@@ -12,7 +12,20 @@
           "package_name": "com.example.tixcycle"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "868459385765-melct0mq8vr47g0msuocrrn237f6j8sl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tixcycle",
+            "certificate_hash": "23193db54cb961c811938a3202e49b766e505064"
+          }
+        },
+        {
+          "client_id": "868459385765-lvtd9hobafcqcnmbb3p1mcarlhi2edca.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB5kIPPVUkmkKC5VdQs_XQ8C3qVB6KALzk"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "868459385765-lvtd9hobafcqcnmbb3p1mcarlhi2edca.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "868459385765-teh4i92siurg35vmm7q2blccv77bgph1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tixcycle"
+              }
+            }
+          ]
         }
       }
     }

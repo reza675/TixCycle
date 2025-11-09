@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tixcycle/repositories/auth_repository.dart';
 import 'package:tixcycle/routes/app_routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tixcycle/routes/app_routes.dart';
 
 class LoginController extends GetxController{
   
@@ -46,6 +48,31 @@ class LoginController extends GetxController{
       }
     }
     
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      isLoading(true);
+      await _authRepository.signInWithGoogle();
+
+      Get.offAllNamed(AppRoutes.BERANDA);
+    } on FirebaseAuthException catch (e) {
+      if (e.code != 'sign-in-cancelled') {
+        Get.snackbar(
+          "Login Gagal",
+          "Gagal masuk dengan Google: ${e.message}",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Login Gagal",
+        "Terjadi kesalahan: ${e.toString()}",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading(false);
+    }
   }
 
 
