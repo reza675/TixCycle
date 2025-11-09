@@ -22,6 +22,9 @@ class AuthRepository{
     required String password,
     required String displayName,
     required String email,
+    required String province,
+    required Timestamp birthOfDate,
+    required String phoneNumber,
   }) async {
     try {
       
@@ -29,7 +32,7 @@ class AuthRepository{
     User? newUser = userCredential.user;
     
     if (newUser != null){
-      UserModel userProfile = UserModel(id: newUser.uid, username: username, email: email, displayName: displayName, timeCreated: Timestamp.now());
+      UserModel userProfile = UserModel(id: newUser.uid, username: username, email: email, displayName: displayName, timeCreated: Timestamp.now(),province: province, birthOfDate: birthOfDate, phoneNumber: phoneNumber);
       
       await _userRepository.buatProfilUser(userProfile);
     } else {

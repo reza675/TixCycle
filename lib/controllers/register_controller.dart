@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:tixcycle/repositories/auth_repository.dart';
 import 'package:tixcycle/routes/app_routes.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; 
+import 'package:intl/intl.dart';
 
 class RegisterController extends GetxController {
   final AuthRepository _authRepository;
@@ -11,10 +13,12 @@ class RegisterController extends GetxController {
 
   // form states
   final usernameController = TextEditingController();
-  final displayNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final provinceController = TextEditingController();
+  final birthOfDateController = TextEditingController(); 
+  final phoneController = TextEditingController();
   final formkey = GlobalKey<FormState>();
 
   // ui states
@@ -35,13 +39,38 @@ class RegisterController extends GetxController {
         return;
       }
 
+      Timestamp? birthOfDateTimestamp;
+      try {
+        // Parse tanggal dari format "dd/MM/yyyy"
+        final birthDate = DateFormat('dd/MM/yyyy')
+            .parseStrict(birthOfDateController.text.trim());
+        birthOfDateTimestamp = Timestamp.fromDate(birthDate);
+      } catch (e) {
+        Get.snackbar(
+          "Registrasi Gagal",
+          "Format tanggal lahir tidak valid. Harap gunakan format dd/mm/yyyy.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // Format nomor telepon dengan +62
+      final String phoneNumber =
+          "+62${phoneController.text.trim().replaceAll(RegExp(r'^[0]'), '')}";
+
       try {
         isLoading(true);
         await _authRepository.signUp(
             username: usernameController.text.trim(),
             password: passwordController.text.trim(),
-            displayName: displayNameController.text.trim(),
-            email: emailController.text.trim());
+            displayName: usernameController.text.trim(),
+            email: emailController.text.trim(),
+            province: provinceController.text.trim(),
+            birthOfDate: birthOfDateTimestamp,
+            phoneNumber: phoneNumber,
+      );
         await _authRepository.signOut(); // jangan nyelonong login le
         Get.offNamed(AppRoutes.LOGIN);
         Get.snackbar(
@@ -98,10 +127,12 @@ class RegisterController extends GetxController {
   @override
   void onClose() {
     usernameController.dispose();
-    displayNameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    provinceController.dispose();
+    birthOfDateController.dispose();
+    phoneController.dispose();
     super.onClose();
   }
 }

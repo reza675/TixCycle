@@ -52,6 +52,13 @@ class PembayaranTiketController extends GetxController {
     }
 
     final UserModel? userProfile = _userAccountController.userProfile.value;
+    String fullPhoneNumber = userProfile?.phoneNumber ?? '';
+    String phoneWithoutPrefix = fullPhoneNumber;
+    if (fullPhoneNumber.startsWith('+62')) {
+      phoneWithoutPrefix = fullPhoneNumber.substring(3);
+    } else if (fullPhoneNumber.startsWith('0')) {
+      phoneWithoutPrefix = fullPhoneNumber.substring(1);
+    }
     nameController = TextEditingController(
       text: userProfile?.displayName.isNotEmpty ?? false
           ? userProfile!.displayName
@@ -60,7 +67,8 @@ class PembayaranTiketController extends GetxController {
     emailController = TextEditingController(
       text: userProfile?.email ?? '',
     );
-    phoneController = TextEditingController();
+    phoneController = TextEditingController(text: phoneWithoutPrefix);
+    
 
     totalPrice.value = cartItems.fold(0.0, (sum, item) => sum + item.subtotal);
   }
@@ -99,6 +107,7 @@ class PembayaranTiketController extends GetxController {
       Get.snackbar("Error", "Harap login ulang.");
       return;
     }
+    final String formattedPhone = "+62${phoneController.text.trim()}";
 
     final transaction = _paymentRepository.buildTransactionObject(
       userId: user.id,
@@ -108,7 +117,7 @@ class PembayaranTiketController extends GetxController {
       customerDetails: CustomerDetails(
         name: nameController.text,
         email: emailController.text,
-        phone: phoneController.text,
+        phone: formattedPhone,
       ),
       selectedMethod: selectedMethod.value!,
     );

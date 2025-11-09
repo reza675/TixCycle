@@ -8,6 +8,9 @@ class UserModel {
   final int coins;
   final Timestamp timeCreated;
   final String? profileImageUrl;
+  final String? province;
+  final Timestamp? birthOfDate;
+  final String? phoneNumber;
 
   UserModel({
     required this.id,
@@ -17,6 +20,9 @@ class UserModel {
     this.coins=0,
     this.profileImageUrl,
     required this.timeCreated,
+    this.province,
+    this.birthOfDate,
+    this.phoneNumber,
 
   });
 
@@ -30,6 +36,9 @@ class UserModel {
       coins: data['coins'] ?? 0,
       profileImageUrl: data['profileImageUrl'],
       timeCreated: data['timeCreated'] ?? Timestamp.now(),
+      province: data['province'],
+      birthOfDate: data['birthOfDate'],
+      phoneNumber: data['phoneNumber'],
     );
   }
 
@@ -42,6 +51,9 @@ class UserModel {
       coins: json['coins'],
       profileImageUrl: json['profileImageUrl'],
       timeCreated: json['timeCreated'] ?? Timestamp.now(),
+      province: json['province'],
+      birthOfDate: json['birthOfDate'],
+      phoneNumber: json['phoneNumber'],
     );
   }
 
@@ -54,6 +66,9 @@ class UserModel {
         'coins' : coins,
         'profileImageUrl' : profileImageUrl,
         'timeCreated' : timeCreated,
+        'province': province,
+        'birthOfDate': birthOfDate,
+        'phoneNumber': phoneNumber,
       };
     }
 }
