@@ -354,9 +354,12 @@ class BeliTiket extends GetView<BeliTiketController> {
                       return;
                     }
                     if (isLoggedIn) {
-                      Get.toNamed(AppRoutes.CHECKOUT, arguments: controller.cartItems);
+                      Get.toNamed(AppRoutes.CHECKOUT, arguments: {
+                        'cartItems': controller.cartItems,
+                        'eventId': controller.eventId,
+                      });
                       return;
-                    } else {  
+                    } else {
                       Get.toNamed(AppRoutes.LOGIN);
                     }
                   },

@@ -14,13 +14,15 @@ class BeliTiketController extends GetxController {
   RxDouble get totalPrice => RxDouble(
         cartItems.fold(0.0, (sum, item) => sum + item.subtotal),
       );
+  
+  String? eventId;
 
   @override
   void onInit() {
     super.onInit();
-    final String? eventId = Get.parameters['id'];
+    eventId = Get.parameters['id'];
     if (eventId != null) {
-      fetchAvaiableTickets(eventId);
+      fetchAvaiableTickets(eventId!);
     } else {
       print("Error: Event ID cannot found");
       isLoading(false);

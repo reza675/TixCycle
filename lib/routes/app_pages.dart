@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:tixcycle/bindings/splash_binding.dart';
+import 'package:tixcycle/views/splash_screen.dart';
 import 'package:tixcycle/bindings/detail_event_binding.dart';
 import 'package:tixcycle/bindings/beli_tiket_binding.dart';
 import 'package:tixcycle/bindings/login_binding.dart'; 
@@ -15,8 +17,9 @@ import 'package:tixcycle/views/pembayaran_tiket.dart';
 
 class AppPages {
   // rute/halaman pertama (nanti diganti splash)
-  static const INITIAL = AppRoutes.BERANDA;
+  static const INITIAL = AppRoutes.SPLASH;
   static final routes = [
+    GetPage(name: AppRoutes.SPLASH, page: ()=> const SplashScreen(), binding: SplashBinding()), // splash screen
     GetPage(name: AppRoutes.BERANDA, page: ()=> const BerandaPage()),    // beranda
     GetPage(name: AppRoutes.LIHAT_TIKET, page: ()=> const DetailEventPage(), binding: DetailEventBinding()), // lihat tiket
     GetPage(name: AppRoutes.PENCARIAN_TIKET, page: ()=> const PencarianTiketPage()), // pencarian tiket

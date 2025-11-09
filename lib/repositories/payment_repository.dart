@@ -15,14 +15,14 @@ class PaymentRepository {
   }
 
  
-  Future<TransactionModel> createNewTransaction({
+  TransactionModel buildTransactionObject({
     required String userId,
     required String eventId, 
     required List<CartItemModel> items,
     required double totalAmount,
     required CustomerDetails customerDetails,
     required PaymentMethodModel selectedMethod,
-  }) async {
+  }) {
     
     String paymentCode;
     if(selectedMethod.category == "Gerai Retail") {
@@ -45,6 +45,10 @@ class PaymentRepository {
       createdAt: Timestamp.now(),
     );
 
-    return _service.createTransaction(newTransaction);
+    return newTransaction;
+  }
+  Future<TransactionModel> saveTransactionToFirebase(
+      TransactionModel transaction) async {
+    return _service.createTransaction(transaction);
   }
 }

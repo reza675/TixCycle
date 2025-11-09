@@ -1,4 +1,5 @@
 abstract class AppRoutes {
+  static const SPLASH = '/splash';
   static const BERANDA = '/beranda';
   // gunakan route dasar; id akan dikirim sebagai segmen path saat navigasi
   static const LIHAT_TIKET = '/lihat_tiket/:id';
