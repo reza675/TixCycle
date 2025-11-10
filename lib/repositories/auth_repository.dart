@@ -3,6 +3,8 @@ import 'package:tixcycle/models/user_model.dart';
 import 'package:tixcycle/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tixcycle/repositories/user_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tixcycle/models/user_model.dart';
 
 class AuthRepository{
   final AuthService _authService;
@@ -22,6 +24,9 @@ class AuthRepository{
     required String password,
     required String displayName,
     required String email,
+    required String province,
+    required Timestamp birthOfDate,
+    required String phoneNumber,
   }) async {
     try {
       
@@ -29,7 +34,7 @@ class AuthRepository{
     User? newUser = userCredential.user;
     
     if (newUser != null){
-      UserModel userProfile = UserModel(id: newUser.uid, username: username, email: email, displayName: displayName, timeCreated: Timestamp.now());
+      UserModel userProfile = UserModel(id: newUser.uid, username: username, email: email, displayName: displayName, timeCreated: Timestamp.now(),province: province, birthOfDate: birthOfDate, phoneNumber: phoneNumber);
       
       await _userRepository.buatProfilUser(userProfile);
     } else {
@@ -43,5 +48,30 @@ class AuthRepository{
 
   Future<void> signOut(){
     return _authService.signOut();
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      final UserCredential userCredential =
+          await _authService.signInWithGoogle();
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+          final newUserModel = UserModel(
+            id: user.uid,
+            username: user.email?.split('@').first ??
+                'user${user.uid.substring(0, 5)}',
+            displayName: user.displayName ?? 'Pengguna Baru',
+            email: user.email ?? '',
+            profileImageUrl: user.photoURL,
+            timeCreated: Timestamp.now(),
+          );
+          await _userRepository.buatProfilUser(newUserModel); 
+        }
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 }

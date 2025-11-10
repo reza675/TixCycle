@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../controllers/beli_tiket_controller.dart';
 import '../models/ticket_model.dart';
 import '../models/cart_item_model.dart';
+import '../controllers/user_account_controller.dart';
+import '../routes/app_routes.dart';
 
 class BeliTiket extends GetView<BeliTiketController> {
   const BeliTiket({super.key});
@@ -160,7 +162,6 @@ class BeliTiket extends GetView<BeliTiketController> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    
                     Text(
                       'Rp ${ticket.price.toStringAsFixed(0)}',
                       style: TextStyle(
@@ -171,7 +172,6 @@ class BeliTiket extends GetView<BeliTiketController> {
                   ],
                 ),
               ),
-
               Obx(() {
                 final cartItem = controller.cartItems
                     .firstWhereOrNull((item) => item.ticket.id == ticket.id);
@@ -184,7 +184,9 @@ class BeliTiket extends GetView<BeliTiketController> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      isSelected ? 'Sisa: $remainingStock' : 'Stok: ${ticket.stock}',
+                      isSelected
+                          ? 'Sisa: $remainingStock'
+                          : 'Stok: ${ticket.stock}',
                       style: TextStyle(
                         color: remainingStock > 0 ? c3 : Colors.red,
                         fontSize: 12,
@@ -192,7 +194,6 @@ class BeliTiket extends GetView<BeliTiketController> {
                       ),
                     ),
                     const SizedBox(height: 8),
-
                     Row(
                       children: [
                         if (isSelected) ...[
@@ -266,6 +267,7 @@ class BeliTiket extends GetView<BeliTiketController> {
       ),
     );
   }
+
   Widget _buildCartSummary() {
     return Obx(() => Container(
           padding: const EdgeInsets.all(16),
@@ -338,6 +340,10 @@ class BeliTiket extends GetView<BeliTiketController> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    final UserAccountController userAccountController =
+                        Get.find<UserAccountController>();
+                    final bool isLoggedIn =
+                        userAccountController.firebaseUser.value != null;
                     if (controller.cartItems.isEmpty) {
                       Get.snackbar(
                         'Error',
@@ -347,8 +353,15 @@ class BeliTiket extends GetView<BeliTiketController> {
                       );
                       return;
                     }
-                    // TODO: Implement checkout logic
-                    Get.toNamed('/checkout');
+                    if (isLoggedIn) {
+                      Get.toNamed(AppRoutes.CHECKOUT, arguments: {
+                        'cartItems': controller.cartItems,
+                        'eventId': controller.eventId,
+                      });
+                      return;
+                    } else {
+                      Get.toNamed(AppRoutes.LOGIN);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: c2,

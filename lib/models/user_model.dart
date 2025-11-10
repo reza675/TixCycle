@@ -8,6 +8,14 @@ class UserModel {
   final int coins;
   final Timestamp timeCreated;
   final String? profileImageUrl;
+  final String? province;
+  final Timestamp? birthOfDate;
+  final String? phoneNumber;
+  final String? occupation; 
+  final String? city;      
+  final String? gender;
+  final String? idType;     
+  final String? idNumber;
 
   UserModel({
     required this.id,
@@ -17,7 +25,14 @@ class UserModel {
     this.coins=0,
     this.profileImageUrl,
     required this.timeCreated,
-
+    this.province,
+    this.birthOfDate,
+    this.phoneNumber,
+    this.occupation,
+    this.city,
+    this.gender,
+    this.idType,
+    this.idNumber,
   });
 
   factory UserModel.fromSnapshot(DocumentSnapshot snapshot) {
@@ -30,6 +45,14 @@ class UserModel {
       coins: data['coins'] ?? 0,
       profileImageUrl: data['profileImageUrl'],
       timeCreated: data['timeCreated'] ?? Timestamp.now(),
+      province: data['province'],
+      birthOfDate: data['birthOfDate'],
+      phoneNumber: data['phoneNumber'],
+      occupation: data['occupation'],
+      city: data['city'],
+      gender: data['gender'],
+      idType: data['idType'],
+      idNumber: data['idNumber'],
     );
   }
 
@@ -42,6 +65,14 @@ class UserModel {
       coins: json['coins'],
       profileImageUrl: json['profileImageUrl'],
       timeCreated: json['timeCreated'] ?? Timestamp.now(),
+      province: json['province'],
+      birthOfDate: json['birthOfDate'],
+      phoneNumber: json['phoneNumber'],
+      occupation: json['occupation'],
+      city: json['city'],
+      gender: json['gender'],
+      idType: json['idType'],
+      idNumber: json['idNumber'],
     );
   }
 
@@ -54,6 +85,14 @@ class UserModel {
         'coins' : coins,
         'profileImageUrl' : profileImageUrl,
         'timeCreated' : timeCreated,
+        'province': province,
+        'birthOfDate': birthOfDate,
+        'phoneNumber': phoneNumber,
+        'occupation': occupation,
+        'city': city,
+        'gender': gender,
+        'idType': idType,
+        'idNumber': idNumber
       };
     }
 }

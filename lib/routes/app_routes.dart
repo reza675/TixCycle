@@ -1,4 +1,5 @@
 abstract class AppRoutes {
+  static const SPLASH = '/splash';
   static const BERANDA = '/beranda';
   // gunakan route dasar; id akan dikirim sebagai segmen path saat navigasi
   static const LIHAT_TIKET = '/lihat_tiket/:id';
@@ -6,4 +7,7 @@ abstract class AppRoutes {
   static const BELI_TIKET = '/beli_tiket/:id';
   static const LOGIN = '/login';
   static const REGISTER = '/register';
+  static const CHECKOUT = '/checkout';
+  static const PROFILE = '/profile';
+  static const EDIT_PROFILE = '/edit_profile';
 }
