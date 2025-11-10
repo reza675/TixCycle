@@ -138,7 +138,7 @@ class _BerandaPageState extends State<BerandaPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _buildSearchbar(controller),
-            ),
+            ),  
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(

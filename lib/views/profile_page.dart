@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import 'package:tixcycle/controllers/user_account_controller.dart';
 import 'package:tixcycle/models/user_model.dart';
 import 'package:tixcycle/routes/app_routes.dart';
 import 'package:tixcycle/views/widgets/bottom_bar.dart'; 
 
-// --- Palet Warna Sesuai Template ---
 const Color c1_cream = Color(0xFFFFF8E2);
 const Color c2_lightGreen = Color(0xFFB3CC86);
 const Color c3_medGreen = Color(0xFF96AD72);
 const Color c4_darkGreen = Color(0xFF3F5135);
 const Color c5_lightCream = Color(0xFFECEDCB);
-// ----------------------------------
 
-// --- 1. Ubah menjadi StatefulWidget ---
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -23,44 +20,31 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // --- 2. Tambahkan state untuk currentIndex ---
-  // Indeks 4 adalah "Profil"
   int currentIndex = 4; 
 
-  // --- 3. Salin & Modifikasi _handleNavigation dari beranda.dart ---
   void _handleNavigation(int index) {
-    // Dapatkan controller
     final userAccountController = Get.find<UserAccountController>();
     final bool isLoggedIn = userAccountController.firebaseUser.value != null;
 
-    // Cek jika halaman butuh login
-    final halamanIndeks = [1, 2, 3, 4]; // Transaksi, Pindai, Koin, Profil
+    final halamanIndeks = [1, 2, 3, 4];
     if (halamanIndeks.contains(index) && !isLoggedIn) {
       Get.toNamed(AppRoutes.LOGIN);
       return;
     }
 
-    // Navigasi jika beda halaman
     if (index == 0) {
-      // Kembali ke Beranda
       Get.offAllNamed(AppRoutes.BERANDA);
     } else if (index == 4) {
-      // Kita sudah di halaman Profil, tidak perlu navigasi
       setState(() {
         currentIndex = index;
       });
     } else {
-      // Untuk Tombol Transaksi, Pindai, Koin (Halaman lain)
       Get.snackbar("Info", "Halaman ini belum diimplementasikan.");
-      // setState(() {
-      //   currentIndex = index;
-      // });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // --- 4. Dapatkan controller di dalam method build ---
     final UserAccountController controller = Get.find<UserAccountController>();
 
     return Container(
@@ -73,9 +57,8 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        extendBody: true, // Agar body tembus di belakang bottom bar
+        extendBody: true, 
         
-        // --- 5. Tambahkan Bottom Bar ---
         bottomNavigationBar: CurvedBottomBar(
           currentIndex: currentIndex,
           onTap: (i) => _handleNavigation(i),
@@ -111,82 +94,162 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 final UserModel user = controller.userProfile.value!;
 
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      
-                      _buildManualAppBar(), 
+                if (user.email == "tixcycleproject@gmail.com") {
+                  return _buildAdminProfileBody(newContext, controller, user);
+                } else {
+                  return _buildUserProfileBody(newContext, controller, user);
+                }
 
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white, 
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(24),
-                            topRight: Radius.circular(24),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, -5),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          children: [
-                            _buildProfileHeader(user), 
-                            const SizedBox(height: 24),
-                            _buildInfoSection(
-                              title: "Info Akun",
-                              children: [
-                                _buildInfoRow("No. Telepon",
-                                    user.phoneNumber ?? "Belum diatur", "UBAH"),
-                                _buildInfoRow(
-                                    "Email", user.email, "UBAH"),
-                                _buildInfoRow(
-                                    "Tipe ID", "Belum diatur", "UBAH"), // Mock-up diubah
-                                _buildInfoRow("Nomor Identitas", "Belum diatur",
-                                    "UBAH"), // Mock-up diubah
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            _buildInfoSection(
-                              title: "Info Pribadi",
-                              buttonText: "UBAH",
-                              onButtonPressed: () {},
-                              children: [
-                                _buildPersonalInfoItem(
-                                    "Nama Lengkap", user.displayName),
-                                _buildPersonalInfoItem(
-                                    "Jenis Kelamin", "Belum diatur"), // Mock-up diubah
-                                _buildPersonalInfoItem(
-                                    "Tanggal Lahir",
-                                    user.birthOfDate != null
-                                        ? DateFormat('dd MMMM yyyy')
-                                            .format(user.birthOfDate!.toDate())
-                                        : "Belum diatur"),
-                                _buildPersonalInfoItem(
-                                    "Provinsi", user.province ?? "Belum diatur"),
-                                _buildPersonalInfoItem("Kota / Kabupaten",
-                                    "Belum diatur"), // Mock-up diubah
-                                _buildPersonalInfoItem(
-                                    "Pekerjaan", "Belum diatur"), // Mock-up diubah
-                              ],
-                            ),
-                            const SizedBox(height: 32),
-                            _buildLogoutButton(controller),
-                            const SizedBox(height: 80), // Spasi untuk bottom bar
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
               });
             }
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildUserProfileBody(BuildContext newContext, UserAccountController controller, UserModel user) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          
+          _buildManualAppBar(), 
+
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white, 
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                _buildProfileHeader(user), 
+                const SizedBox(height: 24),
+                _buildInfoSection(
+                  title: "Info Akun",
+                  children: [
+                    _buildInfoRow("No. Telepon",
+                        user.phoneNumber ?? "Belum diatur", "UBAH"),
+                    _buildInfoRow(
+                        "Email", user.email, "UBAH"),
+                    _buildInfoRow(
+                        "Tipe ID", "Belum diatur", "UBAH"),
+                    _buildInfoRow("Nomor Identitas", "Belum diatur",
+                        "UBAH"),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildInfoSection(
+                  title: "Info Pribadi",
+                  buttonText: "UBAH",
+                  onButtonPressed: () {},
+                  children: [
+                    _buildPersonalInfoItem(
+                        "Nama Lengkap", user.displayName),
+                    _buildPersonalInfoItem(
+                        "Jenis Kelamin", "Belum diatur"), 
+                    _buildPersonalInfoItem(
+                        "Tanggal Lahir",
+                        user.birthOfDate != null
+                            ? DateFormat('dd MMMM yyyy')
+                                .format(user.birthOfDate!.toDate())
+                            : "Belum diatur"),
+                    _buildPersonalInfoItem(
+                        "Provinsi", user.province ?? "Belum diatur"),
+                    _buildPersonalInfoItem("Kota / Kabupaten",
+                        "Belum diatur"),
+                    _buildPersonalInfoItem(
+                        "Pekerjaan", "Belum diatur"), 
+                  ],
+                ),
+                const SizedBox(height: 32),
+                _buildLogoutButton(controller),
+                const SizedBox(height: 80), 
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdminProfileBody(BuildContext newContext, UserAccountController controller, UserModel user) {
+     return SingleChildScrollView(
+      child: Column(
+        children: [
+          
+          _buildManualAppBar(), 
+
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white, 
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                _buildProfileHeader(user), 
+                const SizedBox(height: 24),
+                
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: c1_cream, 
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildInfoRow("Email", user.email, "UBAH"),
+                      _buildInfoRow("Tipe ID", "Belum diatur", "UBAH"),
+                      _buildInfoRow("Nomor Identitas", "Belum diatur", "UBAH"),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                _buildAdminButton(
+                  text: "Kelola Data Tiket", 
+                  onPressed: () {
+                    Get.snackbar("Info", "Halaman Kelola Data Tiket (Admin) belum ada.");
+                  }
+                ),
+                const SizedBox(height: 16),
+                _buildAdminButton(
+                  text: "Tampil Kode QR", 
+                  onPressed: () {
+                    Get.snackbar("Info", "Halaman Tampil Kode QR (Admin) belum ada.");
+                  }
+                ),
+
+                const SizedBox(height: 32),
+                _buildLogoutButton(controller),
+                const SizedBox(height: 80), 
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -198,7 +261,6 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: c4_darkGreen),
-            // Arahkan ke beranda jika 'back' ditekan dari profil
             onPressed: () => Get.offAllNamed(AppRoutes.BERANDA), 
           ),
           const Text(
@@ -223,7 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
               color: Colors.white, 
               shape: BoxShape.circle,
               border: Border.all(
-                color: c4_darkGreen, // Bingkai hijau tua
+                color: c4_darkGreen, 
                 width: 3,            
               ),
               boxShadow: [
@@ -344,7 +406,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: const TextStyle(
                       color: c4_darkGreen, 
                       fontSize: 13,
-                      fontWeight: FontWeight.bold // <-- Label Tebal
+                      fontWeight: FontWeight.bold 
                       ),
                 ),
                 const SizedBox(height: 4),
@@ -385,7 +447,7 @@ class _ProfilePageState extends State<ProfilePage> {
             style: const TextStyle(
               color: c4_darkGreen, 
               fontSize: 14,
-              fontWeight: FontWeight.bold // <-- Label Tebal
+              fontWeight: FontWeight.bold 
             ),
           ),
           Expanded(
@@ -410,7 +472,7 @@ class _ProfilePageState extends State<ProfilePage> {
       child: ElevatedButton(
         onPressed: () async {
           await controller.signOut();
-          Get.offAllNamed(AppRoutes.BERANDA); // Arahkan ke Beranda
+          Get.offAllNamed(AppRoutes.BERANDA); 
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.grey[700],
@@ -423,6 +485,27 @@ class _ProfilePageState extends State<ProfilePage> {
         child: const Text(
           'Log Out',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdminButton({required String text, required VoidCallback onPressed}) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: c3_medGreen, 
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );
