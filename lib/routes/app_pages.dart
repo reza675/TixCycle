@@ -14,6 +14,7 @@ import 'package:tixcycle/views/login_page.dart';
 import 'package:tixcycle/views/register_page.dart'; 
 import 'package:tixcycle/bindings/pembayaran_binding.dart'; 
 import 'package:tixcycle/views/pembayaran_tiket.dart';
+import 'package:tixcycle/views/profile_page.dart';
 
 class AppPages {
   // rute/halaman pertama (nanti diganti splash)
@@ -27,5 +28,6 @@ class AppPages {
     GetPage(name: AppRoutes.LOGIN, page: ()=> const LoginPage(), binding: LoginBinding()), // login page
     GetPage(name: AppRoutes.REGISTER, page: ()=> const RegisterPage(), binding: RegisterBinding()), // register page
     GetPage(name: AppRoutes.CHECKOUT, page: ()=> const PembayaranTiket(), binding: PembayaranBinding()), // pembayaran tiket
+    GetPage(name: AppRoutes.PROFILE, page: ()=> const ProfilePage()),// profile page
   ];
 }

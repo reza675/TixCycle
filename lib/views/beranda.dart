@@ -37,12 +37,18 @@ class _BerandaPageState extends State<BerandaPage> {
     if (halamanIndeks.contains(index) && !isLoggedIn) {
       Get.toNamed(AppRoutes.LOGIN);
       return;
-    }
-    else {
+    } 
+    if (index == 0) {
       setState(() {
         currentIndex = index;
       });
-      
+    } else if (index == 4) {
+      Get.toNamed(AppRoutes.PROFILE); 
+    } else {
+      Get.snackbar("Info", "Halaman ini belum diimplementasikan.");
+      setState(() {
+        currentIndex = index;
+      });
     }
   }
 
@@ -132,17 +138,6 @@ class _BerandaPageState extends State<BerandaPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _buildSearchbar(controller),
-            ),
-
-            Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red[300]),
-                child: const Text("!! LOGOUT (DEBUG) !!", style: TextStyle(color: Colors.white)),
-                onPressed: () {
-                  // Panggil method signOut dari controller
-                  Get.find<UserAccountController>().signOut();
-                },
-              ),
             ),
             const SizedBox(height: 16),
             Container(

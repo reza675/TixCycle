@@ -390,7 +390,7 @@ Widget _buildHeader() {
     );
   }
 
-  // --- WIDGET YANG DIPERBARUI ---
+
   Widget _buildSocialLogin() {
     return Column(
       children: [
@@ -409,14 +409,15 @@ Widget _buildHeader() {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildSocialButton('images/social/google.png'),
+           GestureDetector(
+              onTap: controller.signInWithGoogle, 
+              child: _buildSocialButton('images/social/google.png'),
+            ),
           ],
         ),
       ],
     );
   }
-  // --- BATAS WIDGET YANG DIPERBARUI ---
-
   Widget _buildSocialButton(String? imagePath, {IconData? icon}) {
     return Container(
       width: 60,
