@@ -104,7 +104,7 @@ class _BerandaPageState extends State<BerandaPage> {
       final UserModel? userProfile = userAccountController.userProfile.value;
       String displayName;
       if (userProfile != null && userProfile.username.isNotEmpty) {
-        displayName = userProfile.username; //
+        displayName = userProfile.username; 
       } else {
         displayName = "Greenies"; // Fallback jika (belum login) 
       }
@@ -221,7 +221,7 @@ class _BerandaPageState extends State<BerandaPage> {
                           .toList(),
                     ),
                   const SizedBox(
-                      height: 100), // Spasi untuk bottom navigation bar
+                      height: 100), 
                 ],
               ),
             ),
@@ -378,7 +378,6 @@ class _BerandaPageState extends State<BerandaPage> {
       );
     }
 
-    // Bungkus dengan Obx agar UI ter-update saat selectedCity berubah
     return Obx(() => Container(
           decoration: BoxDecoration(
             color: c1.withOpacity(0.8),
@@ -422,7 +421,6 @@ class _BerandaPageState extends State<BerandaPage> {
     required String imageUrl,
     bool isAsset = false,
   }) {
-    // Tentukan apakah tombol ini sedang aktif
     final bool isActive =
         (cityName.isEmpty && controller.selectedCity.value == null) ||
             (controller.selectedCity.value == cityName);
@@ -442,7 +440,6 @@ class _BerandaPageState extends State<BerandaPage> {
               height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                // Beri border berbeda jika aktif
                 border: Border.all(
                   color: isActive ? c4.withOpacity(0.8) : c3,
                   width: isActive ? 3 : 2,

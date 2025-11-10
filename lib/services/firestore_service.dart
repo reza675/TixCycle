@@ -71,4 +71,15 @@ class FirestoreService {
       rethrow;
     }
   }
+  Future<void> updateData({    // update data
+    required String path, required Map<String,dynamic> data,
+  }) async {
+    try{
+      final reference = _database.doc(path);
+      await reference.update(data);
+    } catch(e) {
+      print("Error updating data: $e");
+      rethrow;
+    }
+  }
 }

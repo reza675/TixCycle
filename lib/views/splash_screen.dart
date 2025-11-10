@@ -5,9 +5,9 @@ import 'package:tixcycle/controllers/splash_controller.dart';
 class SplashScreen extends GetView<SplashController> {
   const SplashScreen({super.key});
 
-  static const Color c1_cream = Color(0xFFFFF8E2); //
-  static const Color c4_darkGreen = Color(0xFF3F5135); //
-  static const Color c3_medGreen = Color(0xFF798E5E); //
+  static const Color c1_cream = Color(0xFFFFF8E2); 
+  static const Color c4_darkGreen = Color(0xFF3F5135); 
+  static const Color c3_medGreen = Color(0xFF798E5E);
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,6 @@ class SplashScreen extends GetView<SplashController> {
             children: [
               const Spacer(flex: 2),
 
-              // 1. Logo
               Image.asset(
                 'images/LOGO.png', 
                 width: 150,

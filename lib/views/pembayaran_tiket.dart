@@ -638,7 +638,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
         ),
         const SizedBox(height: 8),
         Text(
-          "Hanya menerima dari Bank Mandiri", // Ini statis di desain Anda
+          "Hanya menerima dari Bank Mandiri", 
           style: TextStyle(
               fontSize: 13,
               color: c4.withOpacity(0.8),
@@ -671,8 +671,6 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
       ],
     );
   }
-
-  // --- STEP 4: SELESAI ---
 
   Widget _buildStep4Selesai(BuildContext context) {
     return SingleChildScrollView(

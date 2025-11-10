@@ -138,26 +138,23 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildInfoSection(
                   title: "Info Akun",
                   children: [
-                    _buildInfoRow("No. Telepon",
-                        user.phoneNumber ?? "Belum diatur", "UBAH"),
-                    _buildInfoRow(
-                        "Email", user.email, "UBAH"),
-                    _buildInfoRow(
-                        "Tipe ID", "Belum diatur", "UBAH"),
-                    _buildInfoRow("Nomor Identitas", "Belum diatur",
-                        "UBAH"),
+                    _buildPersonalInfoItem("No. Telepon", user.phoneNumber ?? "Belum diatur"),
+                    _buildPersonalInfoItem("Email", user.email),
+                    _buildPersonalInfoItem("Tipe ID", user.idType ?? "Belum diatur"),
+                    _buildPersonalInfoItem("Nomor Identitas", user.idNumber ?? "Belum diatur"),
                   ],
+                
                 ),
                 const SizedBox(height: 24),
                 _buildInfoSection(
                   title: "Info Pribadi",
-                  buttonText: "UBAH",
-                  onButtonPressed: () {},
+                  buttonText: "UBAH", 
+                  onButtonPressed: () => Get.toNamed(AppRoutes.EDIT_PROFILE),
                   children: [
                     _buildPersonalInfoItem(
                         "Nama Lengkap", user.displayName),
                     _buildPersonalInfoItem(
-                        "Jenis Kelamin", "Belum diatur"), 
+                        "Jenis Kelamin", user.gender ?? "Belum diatur"), 
                     _buildPersonalInfoItem(
                         "Tanggal Lahir",
                         user.birthOfDate != null
@@ -166,10 +163,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             : "Belum diatur"),
                     _buildPersonalInfoItem(
                         "Provinsi", user.province ?? "Belum diatur"),
-                    _buildPersonalInfoItem("Kota / Kabupaten",
+                    _buildPersonalInfoItem("Kota / Kabupaten", user.city ??
                         "Belum diatur"),
                     _buildPersonalInfoItem(
-                        "Pekerjaan", "Belum diatur"), 
+                        "Pekerjaan", user.occupation ?? "Belum diatur"), 
                   ],
                 ),
                 const SizedBox(height: 32),
@@ -211,22 +208,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildProfileHeader(user), 
                 const SizedBox(height: 24),
                 
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: c1_cream, 
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    children: [
-                      _buildInfoRow("Email", user.email, "UBAH"),
-                      _buildInfoRow("Tipe ID", "Belum diatur", "UBAH"),
-                      _buildInfoRow("Nomor Identitas", "Belum diatur", "UBAH"),
-                    ],
-                  ),
+                _buildInfoSection(
+                  title: "Info Akun",
+                  buttonText: "UBAH", 
+                  onButtonPressed: () => Get.toNamed(AppRoutes.EDIT_PROFILE), 
+                  children: [
+                    _buildPersonalInfoItem("Email", user.email),
+                    _buildPersonalInfoItem("Tipe ID", user.idType ?? "Belum diatur"),
+                    _buildPersonalInfoItem("Nomor Identitas", user.idNumber ?? "Belum diatur"),
+                  ],
                 ),
-
+              
                 const SizedBox(height: 24),
 
                 _buildAdminButton(
@@ -253,7 +245,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
-
   Widget _buildManualAppBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
@@ -348,7 +339,7 @@ class _ProfilePageState extends State<ProfilePage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: c1_cream, // Wrapper dalam warna krem
+        color: c1_cream, 
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -386,51 +377,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value, String buttonText) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                      color: c4_darkGreen, 
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold 
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              // TODO: Implementasi fungsi 'Ubah'
-            },
-            child: Text(
-              buttonText,
-              style: const TextStyle(
-                  color: c3_medGreen, fontWeight: FontWeight.bold),
-            ),
-          ),
         ],
       ),
     );

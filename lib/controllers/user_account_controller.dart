@@ -22,7 +22,8 @@ class UserAccountController extends GetxController {
     ever(firebaseUser, _handleAuthChanged);
   }
 
-  void _handleAuthChanged(User? user) async {   // ketika status autentikasi berubah
+  void _handleAuthChanged(User? user) async {
+    // ketika status autentikasi berubah
     if (user != null) {
       try {
         isLoading(true);
@@ -35,6 +36,20 @@ class UserAccountController extends GetxController {
       }
     } else {
       userProfile.value = null;
+    }
+  }
+
+  Future<void> refreshUserProfile() async {
+    final user = firebaseUser.value;
+    if (user != null) {
+      try {
+        isLoading(true);
+        userProfile.value = await _userRepository.ambilProfilUser(user.uid);
+      } catch (e) {
+        Get.snackbar("Error", "Gagal memuat ulang profil: " + e.toString());
+      } finally {
+        isLoading(false);
+      }
     }
   }
 

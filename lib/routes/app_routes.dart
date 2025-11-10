@@ -9,4 +9,5 @@ abstract class AppRoutes {
   static const REGISTER = '/register';
   static const CHECKOUT = '/checkout';
   static const PROFILE = '/profile';
+  static const EDIT_PROFILE = '/edit_profile';
 }
