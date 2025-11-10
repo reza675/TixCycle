@@ -133,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                _buildProfileHeader(user), 
+                _buildProfileHeader(user, controller),
                 const SizedBox(height: 24),
                 _buildInfoSection(
                   title: "Info Akun",
@@ -205,7 +205,7 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                _buildProfileHeader(user), 
+                _buildProfileHeader(user, controller), 
                 const SizedBox(height: 24),
                 
                 _buildInfoSection(
@@ -266,7 +266,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildProfileHeader(UserModel user) {
+  Widget _buildProfileHeader(UserModel user, UserAccountController controller) {
     return Center(
       child: Column(
         children: [
@@ -304,13 +304,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 Positioned(
                   bottom: 0,
                   right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: c3_medGreen,
-                      shape: BoxShape.circle,
+                  child: GestureDetector(
+                    onTap: controller.changeProfilePicture,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: c3_medGreen,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Image(image: const AssetImage('images/profile/canvas.png'), height: 16, width: 16,),
                     ),
-                    child: const Icon(Icons.link, color: Colors.white, size: 20),
                   ),
                 ),
               ],
