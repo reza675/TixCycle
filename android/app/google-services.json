@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "868459385765-melct0mq8vr47g0msuocrrn237f6j8sl.apps.googleusercontent.com",
+          "client_id": "868459385765-61aod9tvidteful0cufnouirf7nkec3j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.tixcycle",
-            "certificate_hash": "23193db54cb961c811938a3202e49b766e505064"
+            "certificate_hash": "fa3920ffd171070d25bcb62519eb61499f63d671"
           }
         },
         {
