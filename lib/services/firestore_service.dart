@@ -71,4 +71,14 @@ class FirestoreService {
       rethrow;
     }
   }
+
+  Future<DocumentReference> addData(String collectionPath, Map<String, dynamic> data) async {
+    try {
+      final reference = _database.collection(collectionPath);
+      return await reference.add(data);
+    } catch (e){
+      print("Error adding data: %e");
+      rethrow;
+    }
+  }
 }
