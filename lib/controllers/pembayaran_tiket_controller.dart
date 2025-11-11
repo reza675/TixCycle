@@ -34,7 +34,7 @@ class PembayaranTiketController extends GetxController {
   final Rx<PaymentMethodModel?> selectedMethod = Rx<PaymentMethodModel?>(null);
 
   final Rx<TransactionModel?> finalOrder = Rx<TransactionModel?>(null);
-  
+
   @override
   void onInit() {
     super.onInit();
@@ -152,8 +152,11 @@ class PembayaranTiketController extends GetxController {
 
       final savedTransaction =
           await _paymentRepository.saveTransactionToFirebase(finalOrder.value!);
-      
+
       finalOrder.value = savedTransaction;
+
+      // Update stok tiket setelah transaksi berhasil disimpan
+      await _updateTicketStocks();
 
       currentStep.value = 4;
 
@@ -161,11 +164,32 @@ class PembayaranTiketController extends GetxController {
         final beliTiketController = Get.find<BeliTiketController>();
         beliTiketController.clearCart();
       }
-      
     } catch (e) {
       Get.snackbar("Error", "Gagal menyimpan pesanan: ${e.toString()}");
     } finally {
       isLoading(false);
+    }
+  }
+
+  Future<void> _updateTicketStocks() async {
+    try {
+      // Buat map dari ticketId dan quantity yang dibeli
+      Map<String, int> ticketQuantities = {};
+      for (var item in cartItems) {
+        ticketQuantities[item.ticket.id] = item.quantity.value;
+      }
+
+      // Update stok tiket di Firestore
+      await _eventRepository.updateMultipleTicketStocks(
+        eventId: eventId,
+        ticketQuantities: ticketQuantities,
+      );
+
+      print("Ticket stocks updated successfully");
+    } catch (e) {
+      print("Error updating ticket stocks: $e");
+      // Tidak throw error agar transaksi tetap selesai
+      // Stok akan diupdate secara manual jika perlu
     }
   }
 

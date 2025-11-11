@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/beli_tiket_controller.dart';
 import '../models/ticket_model.dart';
-import '../models/cart_item_model.dart';
 import '../controllers/user_account_controller.dart';
 import '../routes/app_routes.dart';
 
@@ -99,27 +98,42 @@ class BeliTiket extends GetView<BeliTiketController> {
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(
-                'Pilih Tiket Anda',
-                style: TextStyle(
-                  color: c4,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Pilih Tiket Anda',
+                    style: TextStyle(
+                      color: c4,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.refresh, color: c3),
+                    onPressed: () => controller.refreshTickets(),
+                    tooltip: 'Refresh stok tiket',
+                  ),
+                ],
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  ...controller.availableTickets.map((ticket) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildTicketCard(ticket),
-                      )),
-                  const SizedBox(height: 20),
-                  if (controller.cartItems.isNotEmpty) _buildCartSummary(),
-                  const SizedBox(height: 20),
-                ],
+              child: RefreshIndicator(
+                onRefresh: () => controller.refreshTickets(),
+                color: c3,
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    ...controller.availableTickets.map((ticket) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _buildTicketCard(ticket),
+                        )),
+                    const SizedBox(height: 20),
+                    if (controller.cartItems.isNotEmpty) _buildCartSummary(),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
           ],
@@ -199,9 +213,7 @@ class BeliTiket extends GetView<BeliTiketController> {
                         if (isSelected) ...[
                           GestureDetector(
                             onTap: () {
-                              if (cartItem != null) {
-                                controller.removeTicketFromCart(cartItem);
-                              }
+                              controller.removeTicketFromCart(cartItem);
                             },
                             child: Container(
                               padding: const EdgeInsets.all(4),

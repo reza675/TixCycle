@@ -3,29 +3,33 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _database = FirebaseFirestore.instance;
 
-  Future<void> setData({    // simpan data
-    required String path, required Map<String,dynamic> data,
+  Future<void> setData({
+    // simpan data
+    required String path,
+    required Map<String, dynamic> data,
   }) async {
-    try{
+    try {
       final reference = _database.doc(path);
       await reference.set(data);
-    } catch(e) {
+    } catch (e) {
       print("Error setting data: $e");
       rethrow;
     }
   }
 
-  Future<DocumentSnapshot> getDocument({required String path}) async {    // ambil satu data/dokumen
-    try{
+  Future<DocumentSnapshot> getDocument({required String path}) async {
+    // ambil satu data/dokumen
+    try {
       final reference = _database.doc(path);
       return await reference.get();
-    }catch (e) {
+    } catch (e) {
       print("Error fetching document: $e");
       rethrow;
     }
   }
 
-  Future<List<DocumentSnapshot>> getCollection({    // ambil collection
+  Future<List<DocumentSnapshot>> getCollection({
+    // ambil collection
     required String collectionPath,
   }) async {
     try {
@@ -38,28 +42,31 @@ class FirestoreService {
     }
   }
 
-  Future<QuerySnapshot> getQuery({    // filter data berdasarkan kondisi 
+  Future<QuerySnapshot> getQuery({
+    // filter data berdasarkan kondisi
     required String collectionPath,
     required String whereField,
     required dynamic isEqualTo,
   }) async {
     try {
       final reference = _database.collection(collectionPath);
-      return await reference.where(whereField,isEqualTo: isEqualTo).get();
-    } catch(e){
+      return await reference.where(whereField, isEqualTo: isEqualTo).get();
+    } catch (e) {
       print("Error getting query: $e");
       rethrow;
     }
   }
 
-  Future<QuerySnapshot> getPaginatedQuery({   // data lazy loading
+  Future<QuerySnapshot> getPaginatedQuery({
+    // data lazy loading
     required String collectionPath,
     required int limit,
     required String orderBy,
     DocumentSnapshot? startAfter,
   }) async {
     try {
-      Query query = _database.collection(collectionPath).orderBy(orderBy).limit(limit);
+      Query query =
+          _database.collection(collectionPath).orderBy(orderBy).limit(limit);
 
       if (startAfter != null) {
         query = query.startAfterDocument(startAfter);
@@ -71,14 +78,45 @@ class FirestoreService {
       rethrow;
     }
   }
-  Future<void> updateData({    // update data
-    required String path, required Map<String,dynamic> data,
+
+  Future<void> updateData({
+    // update data
+    required String path,
+    required Map<String, dynamic> data,
   }) async {
-    try{
+    try {
       final reference = _database.doc(path);
       await reference.update(data);
-    } catch(e) {
+    } catch (e) {
       print("Error updating data: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> decrementField({
+    // kurangi nilai field (untuk stock tiket)
+    required String path,
+    required String field,
+    required int decrementBy,
+  }) async {
+    try {
+      final reference = _database.doc(path);
+      await reference.update({
+        field: FieldValue.increment(-decrementBy),
+      });
+    } catch (e) {
+      print("Error decrementing field: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> runTransaction({
+    required Future<void> Function(Transaction) transactionHandler,
+  }) async {
+    try {
+      await _database.runTransaction(transactionHandler);
+    } catch (e) {
+      print("Error running transaction: $e");
       rethrow;
     }
   }

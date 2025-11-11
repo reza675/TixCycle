@@ -14,7 +14,7 @@ class BeliTiketController extends GetxController {
   RxDouble get totalPrice => RxDouble(
         cartItems.fold(0.0, (sum, item) => sum + item.subtotal),
       );
-  
+
   String? eventId;
 
   @override
@@ -26,6 +26,12 @@ class BeliTiketController extends GetxController {
     } else {
       print("Error: Event ID cannot found");
       isLoading(false);
+    }
+  }
+
+  Future<void> refreshTickets() async {
+    if (eventId != null) {
+      await fetchAvaiableTickets(eventId!);
     }
   }
 
@@ -41,15 +47,16 @@ class BeliTiketController extends GetxController {
     }
   }
 
-  void addTicketToCart(TicketModel ticket){
-    final existingItem = cartItems.firstWhereOrNull((item)=> item.ticket.id == ticket.id);
+  void addTicketToCart(TicketModel ticket) {
+    final existingItem =
+        cartItems.firstWhereOrNull((item) => item.ticket.id == ticket.id);
 
     int currentQuantity = 0;
     if (existingItem != null) {
       currentQuantity = existingItem.quantity.value;
     }
     if (currentQuantity < ticket.stock) {
-      if(existingItem != null){
+      if (existingItem != null) {
         existingItem.incrementQuantity();
         cartItems.refresh();
       } else {
@@ -57,14 +64,14 @@ class BeliTiketController extends GetxController {
       }
     } else {
       Get.snackbar(
-        "Stok Habis", 
+        "Stok Habis",
         "Maaf, stok untuk tiket ${ticket.categoryName} sudah mencapai batas.",
         backgroundColor: Colors.red.withOpacity(0.8),
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
       );
     }
-   }
+  }
 
   void removeTicketFromCart(CartItemModel cartItem) {
     if (cartItem.quantity.value > 1) {
