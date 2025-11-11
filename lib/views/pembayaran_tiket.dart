@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:tixcycle/controllers/pembayaran_tiket_controller.dart';
 import 'package:tixcycle/models/cart_item_model.dart';
+import 'package:tixcycle/models/event_model.dart';
 import 'package:tixcycle/models/payment_method_model.dart';
+import 'package:tixcycle/models/transaction_model.dart';
 import 'package:tixcycle/routes/app_routes.dart';
 
 class PembayaranTiket extends GetView<PembayaranTiketController> {
@@ -34,9 +37,9 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             case 2:
               return _buildStep2PilihMetode(context);
             case 3:
-              return _buildStep3Bayar(context); 
+              return _buildStep3Bayar(context);
             case 4:
-              return _buildStep4Selesai(context); 
+              return _buildStep4Selesai(context);
             default:
               return const Center(child: Text('Halaman tidak ditemukan'));
           }
@@ -52,15 +55,13 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: c4),
         onPressed: () {
-          final step = controller.currentStep.value;   
-          if (step == 4) { 
+          final step = controller.currentStep.value;
+          if (step == 4) {
             Get.offAllNamed(AppRoutes.BERANDA);
-          } 
-          else if (step > 1) {
-            controller.currentStep.value = step - 1; 
-          } 
-          else { 
-            Get.back(); 
+          } else if (step > 1) {
+            controller.currentStep.value = step - 1;
+          } else {
+            Get.back();
           }
         },
       ),
@@ -71,10 +72,10 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             title = 'Pilih Metode';
             break;
           case 3:
-            title = 'Payment'; 
+            title = 'Payment';
             break;
           case 4:
-            title = 'Selesai';
+            title = 'E-Ticket';
             break;
           default:
             title = 'Pembayaran';
@@ -94,7 +95,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
           if (controller.currentStep.value > 1) {
             return _buildStepper(controller.currentStep.value);
           } else {
-            return const SizedBox.shrink(); 
+            return const SizedBox.shrink();
           }
         }),
       ),
@@ -174,7 +175,6 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
     );
   }
 
-  // detail pesanan
   Widget _buildStep1DetailPemesan(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -270,8 +270,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
-            if (value == null || value.isEmpty)
-              return 'Email tidak boleh kosong';
+            if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
             if (!GetUtils.isEmail(value)) return 'Format email tidak valid';
             return null;
           },
@@ -372,7 +371,6 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             borderSide: const BorderSide(color: Colors.red, width: 2)));
   }
 
-  // pilih metode
   Widget _buildStep2PilihMetode(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value) {
@@ -407,7 +405,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
                 text: "Lanjutkan",
                 onPressed: controller.selectedMethod.value == null
                     ? null
-                    : controller.prepareFinalOrder, 
+                    : controller.prepareFinalOrder,
                 isLoading: false.obs,
               ),
             ),
@@ -450,8 +448,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
         const SizedBox(height: 16),
         if (categoryName == "E-Wallet" || categoryName == "Gerai Retail")
           SingleChildScrollView(
-            scrollDirection:
-                Axis.horizontal,
+            scrollDirection: Axis.horizontal,
             child: Row(
               children: displayMethods.map((method) {
                 return Padding(
@@ -535,16 +532,16 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
           controller.selectedMethod.value == null) {
         return const Center(child: CircularProgressIndicator());
       }
-      
+
       final String category = controller.selectedMethod.value!.category;
-      
+
       return SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8), 
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Text(
                 category,
                 style: const TextStyle(
@@ -554,20 +551,16 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
                 ),
               ),
             ),
-      
-
-            _buildCardContainer(
-                _buildPaymentCodeWidget()), 
+            _buildCardContainer(_buildPaymentCodeWidget()),
             const SizedBox(height: 24),
-            _buildCardContainer(
-                _buildPaymentInstructionsWidget()), 
+            _buildCardContainer(_buildPaymentInstructionsWidget()),
             const SizedBox(height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: _buildLanjutkanButton(
                 text: "Lanjutkan",
-                onPressed: controller.saveOrderAndGoToStep4, 
-                isLoading: controller.isLoading, 
+                onPressed: controller.saveOrderAndGoToStep4,
+                isLoading: controller.isLoading,
               ),
             ),
           ],
@@ -638,7 +631,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
         ),
         const SizedBox(height: 8),
         Text(
-          "Hanya menerima dari Bank Mandiri", 
+          "Hanya menerima dari Bank Mandiri",
           style: TextStyle(
               fontSize: 13,
               color: c4.withOpacity(0.8),
@@ -673,6 +666,280 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
   }
 
   Widget _buildStep4Selesai(BuildContext context) {
+    return Obx(() {
+      final order = controller.finalOrder.value;
+      final event = controller.event.value;
+
+      final bool hasTickets =
+          (order != null && order.purchasedItems.isNotEmpty);
+
+      if (order == null || !hasTickets) {
+        return _buildStep4GenericSelesai(context);
+      }
+
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            _buildTicketEventBannerCard(event),
+            const SizedBox(height: 20),
+            _buildTicketEventTimeSection(event),
+            const SizedBox(height: 20),
+            _buildTicketListCard(order.purchasedItems),
+            const SizedBox(height: 20),
+            _buildPurchaseDetailCard(order),
+            const SizedBox(height: 20),
+            _buildQrCodeButton(),
+            const SizedBox(height: 80),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildBannerPlaceholder() {
+    return Container(
+      height: 180,
+      color: Colors.grey[200],
+      child: const Center(child: Text("Event Banner")),
+    );
+  }
+
+  Widget _buildTicketEventBannerCard(EventModel? event) {
+    final String eventBannerUrl = event?.imageUrl ?? '';
+    final bool isNetworkBanner = eventBannerUrl.startsWith('http');
+
+    return Card(
+      color: Colors.white,
+      elevation: 4,
+      shadowColor: Colors.black.withOpacity(0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: isNetworkBanner
+          ? Image.network(
+              eventBannerUrl,
+              width: double.infinity,
+              height: 180,
+              fit: BoxFit.cover,
+              errorBuilder: (c, e, s) => _buildBannerPlaceholder(),
+            )
+          : Image.asset(
+              'images/beranda/tampilan1.jpg',
+              width: double.infinity,
+              height: 180,
+              fit: BoxFit.cover,
+              errorBuilder: (c, e, s) => _buildBannerPlaceholder(),
+            ),
+    );
+  }
+
+  Widget _buildTicketEventTimeSection(EventModel? event) {
+    final String eventDate = event != null
+        ? DateFormat('dd MMMM yyyy').format(event.date)
+        : "Loading...";
+    final String eventTime = event != null
+        ? DateFormat('HH.mm').format(event.date) + " WIB"
+        : "Loading...";
+    final String eventLocation = event != null
+        ? "${event.venueName}, ${event.city}"
+        : "Loading...";
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "WAKTU YANG DI NANTI",
+            style: TextStyle(
+                color: c4,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                shadows: [
+                  Shadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 4,
+                      offset: Offset(0, 2))
+                ]),
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow(Icons.calendar_today_outlined, eventDate, isBold: true),
+          _buildInfoRow(Icons.access_time_outlined, eventTime, isBold: true),
+          _buildInfoRow(Icons.location_on_outlined, eventLocation, isBold: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
+    final firstTicket = allTickets.first;
+    final bool hasMultipleTickets = allTickets.length > 1;
+
+    Widget buildTicketDetails(PurchasedTicketItem ticket) {
+      return Column(
+        children: [
+          _buildDetailRow("Tipe Tiket", ticket.categoryName),
+          _buildDetailRow("Nomor Kursi", ticket.seatNumber),
+          _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
+              isPrice: true),
+          Divider(color: Colors.grey[300], height: 24),
+          _buildDetailRow("ID Tiket", ticket.ticketId),
+        ],
+      );
+    }
+
+    Widget buildExpansionDivider() {
+      return Divider(
+        color: Colors.grey[400],
+        height: 24,
+        thickness: 1,
+      );
+    }
+
+    return Card(
+      color: Colors.white,
+      elevation: 4,
+      shadowColor: Colors.black.withOpacity(0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: !hasMultipleTickets
+            ? buildTicketDetails(firstTicket)
+            : ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: EdgeInsets.zero,
+                trailing: const SizedBox.shrink(),
+                title: buildTicketDetails(firstTicket),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Lihat ${allTickets.length - 1} Pesanan Lainnya",
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.keyboard_arrow_down,
+                          color: Colors.grey[600], size: 18),
+                    ],
+                  ),
+                ),
+                children: allTickets.skip(1).map((ticket) {
+                  return Column(
+                    children: [
+                      buildExpansionDivider(),
+                      buildTicketDetails(ticket),
+                    ],
+                  );
+                }).toList(),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildPurchaseDetailCard(TransactionModel order) {
+    final String nomorPesanan = order.id;
+    final String tanggalPembelian =
+        DateFormat('dd MMMM yyyy').format(order.createdAt.toDate());
+    final String metodePembayaran = order.paymentMethodName;
+    final double totalAmount = order.totalAmount;
+
+    return Card(
+      color: Colors.white,
+      elevation: 4,
+      shadowColor: Colors.black.withOpacity(0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Detail Pembelian",
+              style:
+                  TextStyle(color: c4, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            _buildDetailRow("Nomor Pesanan", nomorPesanan),
+            _buildDetailRow("Tanggal Pembelian", tanggalPembelian),
+            _buildDetailRow("Metode Pembayaran", metodePembayaran),
+            const Divider(color: Colors.transparent, height: 6),
+            _buildDetailRow("Total Harga", "RP${totalAmount.toStringAsFixed(0)}",
+                isPrice: true),
+            const SizedBox(height: 4),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQrCodeButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: c3,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: () {
+          Get.snackbar(
+              "Info", "Fitur Tampilkan QR Code belum diimplementasikan.");
+        },
+        child: const Text(
+          "Tampilkan QR Code",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text, {bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.grey[800], size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+              child: Text(text,
+                  style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 14,
+                      fontWeight: isBold ? FontWeight.w600 : FontWeight.normal))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+          Flexible(
+            child: Text(value,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                    color: isPrice ? Colors.red : Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep4GenericSelesai(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: _buildCardContainer(

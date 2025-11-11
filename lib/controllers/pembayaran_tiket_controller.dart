@@ -7,31 +7,34 @@ import 'package:tixcycle/models/payment_method_model.dart';
 import 'package:tixcycle/models/transaction_model.dart';
 import 'package:tixcycle/models/user_model.dart';
 import 'package:tixcycle/repositories/payment_repository.dart';
+import 'package:tixcycle/models/event_model.dart';
+import 'package:tixcycle/repositories/event_repository.dart';
 
 class PembayaranTiketController extends GetxController {
   final PaymentRepository _paymentRepository;
   PembayaranTiketController(this._paymentRepository);
   final UserAccountController _userAccountController = Get.find();
+
+  final EventRepository _eventRepository = Get.find();
+  final event = Rx<EventModel?>(null);
+
   late List<CartItemModel> cartItems;
   late String eventId;
 
-  // form controlller
   final formKey = GlobalKey<FormState>();
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
 
-  // state buat ui
-  var currentStep = 1.obs; // 1: Detail, 2: Metode, 3: Bayar
+  var currentStep = 1.obs;
   var isLoading = false.obs;
   final RxDouble totalPrice = 0.0.obs;
 
-  // state tempat simpan data
   final RxList<PaymentMethodModel> paymentMethods = <PaymentMethodModel>[].obs;
   final Rx<PaymentMethodModel?> selectedMethod = Rx<PaymentMethodModel?>(null);
 
-  // order sekarang hanya menyimpan data sementara (di memori)
   final Rx<TransactionModel?> finalOrder = Rx<TransactionModel?>(null);
+  
   @override
   void onInit() {
     super.onInit();
@@ -51,6 +54,10 @@ class PembayaranTiketController extends GetxController {
       return;
     }
 
+    if (eventId.isNotEmpty) {
+      _fetchEventDetails(eventId);
+    }
+
     final UserModel? userProfile = _userAccountController.userProfile.value;
     String fullPhoneNumber = userProfile?.phoneNumber ?? '';
     String phoneWithoutPrefix = fullPhoneNumber;
@@ -68,9 +75,17 @@ class PembayaranTiketController extends GetxController {
       text: userProfile?.email ?? '',
     );
     phoneController = TextEditingController(text: phoneWithoutPrefix);
-    
 
     totalPrice.value = cartItems.fold(0.0, (sum, item) => sum + item.subtotal);
+  }
+
+  Future<void> _fetchEventDetails(String eventId) async {
+    try {
+      final eventData = await _eventRepository.getEventById(eventId);
+      event.value = eventData;
+    } catch (e) {
+      print("Error fetching event details in PaymentController: $e");
+    }
   }
 
   Future<void> _fetchPaymentMethods() async {
@@ -101,7 +116,7 @@ class PembayaranTiketController extends GetxController {
       Get.snackbar("Error", "Harap pilih metode pembayaran.");
       return;
     }
-    
+
     final user = _userAccountController.userProfile.value;
     if (user == null) {
       Get.snackbar("Error", "Harap login ulang.");
@@ -122,8 +137,8 @@ class PembayaranTiketController extends GetxController {
       selectedMethod: selectedMethod.value!,
     );
 
-    finalOrder.value = transaction; // Simpan di memori
-    currentStep.value = 3; 
+    finalOrder.value = transaction;
+    currentStep.value = 3;
   }
 
   Future<void> saveOrderAndGoToStep4() async {
@@ -134,9 +149,19 @@ class PembayaranTiketController extends GetxController {
 
     try {
       isLoading(true);
-      await _paymentRepository.saveTransactionToFirebase(finalOrder.value!);
+
+      final savedTransaction =
+          await _paymentRepository.saveTransactionToFirebase(finalOrder.value!);
+      
+      finalOrder.value = savedTransaction;
+
       currentStep.value = 4;
-      Get.find<BeliTiketController>().clearCart();
+
+      if (Get.isRegistered<BeliTiketController>()) {
+        final beliTiketController = Get.find<BeliTiketController>();
+        beliTiketController.clearCart();
+      }
+      
     } catch (e) {
       Get.snackbar("Error", "Gagal menyimpan pesanan: ${e.toString()}");
     } finally {

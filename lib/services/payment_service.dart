@@ -28,7 +28,10 @@ class PaymentService {
     try {
       final docRef = await FirebaseFirestore.instance.collection('transactions').add(transactionData.toJson());
 
-      return transactionData.copyWith(id: docRef.id);
+      final newDoc = await docRef.get();
+      final newTransaction = TransactionModel.fromSnapshot(newDoc);
+      return newTransaction;
+
     } catch (e) {
       print('Error creating transaction: $e');
       rethrow;
