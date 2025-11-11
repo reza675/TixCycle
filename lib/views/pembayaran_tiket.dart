@@ -745,7 +745,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
         : "Loading...";
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -753,92 +753,104 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             "WAKTU YANG DI NANTI",
             style: TextStyle(
                 color: c4,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
                 shadows: [
                   Shadow(
                       color: Colors.black.withOpacity(0.2),
                       blurRadius: 4,
-                      offset: Offset(0, 2))
+                      offset: Offset(0, 3))
                 ]),
           ),
           const SizedBox(height: 12),
-          _buildInfoRow(Icons.calendar_today_outlined, eventDate, isBold: true),
-          _buildInfoRow(Icons.access_time_outlined, eventTime, isBold: true),
-          _buildInfoRow(Icons.location_on_outlined, eventLocation, isBold: true),
+          Padding(
+            padding: const EdgeInsets.only(left: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoRow(Icons.calendar_today_outlined, eventDate, isBold: true),
+                _buildInfoRow(Icons.access_time_outlined, eventTime, isBold: true),
+                _buildInfoRow(Icons.location_on_outlined, eventLocation, isBold: true),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
-    final firstTicket = allTickets.first;
-    final bool hasMultipleTickets = allTickets.length > 1;
+Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
+  final firstTicket = allTickets.first;
+  final bool hasMultipleTickets = allTickets.length > 1;
 
-    Widget buildTicketDetails(PurchasedTicketItem ticket) {
-      return Column(
+  Widget buildTicketDetails(PurchasedTicketItem ticket) {
+    return Column(
+      children: [
+        _buildDetailRow("Tipe Tiket", ticket.categoryName),
+        _buildDetailRow("Nomor Kursi", ticket.seatNumber),
+        _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
+            isPrice: true),
+        Divider(color: Colors.grey[300], height: 24),
+        _buildDetailRow("ID Tiket", ticket.ticketId),
+      ],
+    );
+  }
+
+  Widget buildExpansionDivider() {
+    return Divider(
+      color: Colors.grey[400],
+      height: 24,
+      thickness: 1,
+    );
+  }
+
+  return Card(
+    color: Colors.white,
+    elevation: 4,
+    shadowColor: Colors.black.withOpacity(0.2),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    clipBehavior: Clip.antiAlias,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0), 
+      child: Column(
         children: [
-          _buildDetailRow("Tipe Tiket", ticket.categoryName),
-          _buildDetailRow("Nomor Kursi", ticket.seatNumber),
-          _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
-              isPrice: true),
-          Divider(color: Colors.grey[300], height: 24),
-          _buildDetailRow("ID Tiket", ticket.ticketId),
-        ],
-      );
-    }
-
-    Widget buildExpansionDivider() {
-      return Divider(
-        color: Colors.grey[400],
-        height: 24,
-        thickness: 1,
-      );
-    }
-
-    return Card(
-      color: Colors.white,
-      elevation: 4,
-      shadowColor: Colors.black.withOpacity(0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: !hasMultipleTickets
-            ? buildTicketDetails(firstTicket)
-            : ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                childrenPadding: EdgeInsets.zero,
-                trailing: const SizedBox.shrink(),
-                title: buildTicketDetails(firstTicket),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Lihat ${allTickets.length - 1} Pesanan Lainnya",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down,
-                          color: Colors.grey[600], size: 18),
-                    ],
+          buildTicketDetails(firstTicket),
+          if (hasMultipleTickets) ...[
+            buildExpansionDivider(), 
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: EdgeInsets.zero,
+              trailing: const SizedBox.shrink(),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Lihat ${allTickets.length - 1} Pesanan Lainnya",
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
                   ),
-                ),
-                children: allTickets.skip(1).map((ticket) {
-                  return Column(
-                    children: [
-                      buildExpansionDivider(),
-                      buildTicketDetails(ticket),
-                    ],
-                  );
-                }).toList(),
+                  const SizedBox(width: 4),
+                  Icon(Icons.keyboard_arrow_down,
+                      color: Colors.grey[600], size: 18),
+                ],
               ),
+              children: allTickets.skip(1).map((ticket) {
+                return Column(
+                  children: [
+                    buildExpansionDivider(),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: buildTicketDetails(ticket),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ]
+        ],
       ),
-    );
-  }
-
+    ),
+  );
+}
   Widget _buildPurchaseDetailCard(TransactionModel order) {
     final String nomorPesanan = order.id;
     final String tanggalPembelian =
@@ -919,25 +931,29 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-          Flexible(
-            child: Text(value,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                    color: isPrice ? Colors.red : Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14)),
-          ),
-        ],
-      ),
-    );
-  }
+Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100, 
+          child: Text(label,
+              style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+        ),
+        Expanded(
+          child: Text(value,
+              textAlign: TextAlign.right, 
+              style: TextStyle(
+                  color: isPrice ? Colors.red : Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14)),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildStep4GenericSelesai(BuildContext context) {
     return SingleChildScrollView(
