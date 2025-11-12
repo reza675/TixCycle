@@ -6,6 +6,8 @@
     <string>Aplikasi ini membutuhkan akses lokasi untuk menampilkan event yang ada di sekitar Anda.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Aplikasi ini membutuhkan akses lokasi untuk menampilkan event yang ada di sekitar Anda.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Aplikasi ini membutuhkan akses kamera untuk scan QR Code sampah.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
