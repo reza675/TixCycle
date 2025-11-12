@@ -91,14 +91,12 @@ class LoginPage extends GetView<LoginController> {
                 color: Colors.grey[700], fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
         TextFormField(
-          // 1. Hubungkan controller
           controller: controller.emailController,
           decoration: _buildInputDecoration(
             hint: 'example@gmail.com',
             icon: Icons.email_outlined,
           ),
           keyboardType: TextInputType.emailAddress,
-          // 2. Tambahkan validasi
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Email tidak boleh kosong';
@@ -165,7 +163,7 @@ class LoginPage extends GetView<LoginController> {
               ),
             ),
             onPressed: controller.isLoading.value
-                ? null // Nonaktifkan tombol saat loading
+                ? null 
                 : controller.signInWithEmailPassword,
             child: controller.isLoading.value
                 ? const SizedBox(
@@ -176,7 +174,6 @@ class LoginPage extends GetView<LoginController> {
                       strokeWidth: 2,
                     ),
                   )
-                // 3. Tampilkan teks
                 : const Text("Log In",
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -197,7 +194,6 @@ class LoginPage extends GetView<LoginController> {
         ],
       ),
       onPressed: () {
-        // Panggil rute
         Get.offNamed(AppRoutes.REGISTER);
       },
     );
@@ -232,7 +228,7 @@ class LoginPage extends GetView<LoginController> {
       alignment: Alignment.topRight,
       child: GestureDetector(
         onTap: () => Get.offAllNamed(
-            AppRoutes.BERANDA), // Aksi default: kembali ke beranda
+            AppRoutes.BERANDA), 
         child: Icon(Icons.close, color: Colors.grey[600], size: 28),
       ),
     );
@@ -390,7 +386,7 @@ Widget _buildHeader() {
     );
   }
 
-  // --- WIDGET YANG DIPERBARUI ---
+
   Widget _buildSocialLogin() {
     return Column(
       children: [
@@ -409,14 +405,15 @@ Widget _buildHeader() {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildSocialButton('images/social/google.png'),
+           GestureDetector(
+              onTap: controller.signInWithGoogle, 
+              child: _buildSocialButton('images/social/google.png'),
+            ),
           ],
         ),
       ],
     );
   }
-  // --- BATAS WIDGET YANG DIPERBARUI ---
-
   Widget _buildSocialButton(String? imagePath, {IconData? icon}) {
     return Container(
       width: 60,

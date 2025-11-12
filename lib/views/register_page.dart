@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tixcycle/controllers/register_controller.dart';
 import 'package:tixcycle/routes/app_routes.dart';
+import 'package:intl/intl.dart';
 
 class RegisterPage extends GetView<RegisterController> {
   const RegisterPage({super.key});
@@ -65,8 +66,13 @@ class RegisterPage extends GetView<RegisterController> {
           const SizedBox(height: 24),
           _buildToggleButtons(isLoginView: false),
           const SizedBox(height: 24),
-          const SizedBox(height: 16),
           _buildUsernameField(),
+          const SizedBox(height: 16),
+          _buildProvinceField(), 
+          const SizedBox(height: 16),
+          _buildBirthOfDateField(context),
+          const SizedBox(height: 16),
+          _buildPhoneField(), 
           const SizedBox(height: 16),
           _buildEmailField(),
           const SizedBox(height: 16),
@@ -79,31 +85,6 @@ class RegisterPage extends GetView<RegisterController> {
           _buildLoginButton(),
         ],
       ),
-    );
-  }
-
-  Widget _buildDisplayNameField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Name',
-            style: TextStyle(
-                color: Colors.grey[700], fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller.displayNameController,
-          decoration: _buildInputDecoration(
-            hint: 'e.g. Jordanio',
-            icon: Icons.badge_outlined,
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Nama Tampilan tidak boleh kosong';
-            }
-            return null;
-          },
-        ),
-      ],
     );
   }
 
@@ -228,13 +209,116 @@ class RegisterPage extends GetView<RegisterController> {
       ],
     );
   }
+  Widget _buildProvinceField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Province',
+            style: TextStyle(
+                color: Colors.grey[700], fontWeight: FontWeight.w500)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller.provinceController,
+          decoration: _buildInputDecoration(
+            hint: 'e.g. Jakarta',
+            icon: Icons.map_outlined,
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Provinsi tidak boleh kosong';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBirthOfDateField(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Birth of date',
+            style: TextStyle(
+                color: Colors.grey[700], fontWeight: FontWeight.w500)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller.birthOfDateController,
+          readOnly: true,
+          decoration: _buildInputDecoration(
+            hint: '18/03/2000',
+            icon: Icons.calendar_today_outlined,
+          ).copyWith(
+            suffixIcon: Icon(Icons.calendar_month_outlined,
+                color: Colors.grey[500]),
+          ),
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+            );
+            if (pickedDate != null) {
+              String formattedDate =
+                  DateFormat('dd/MM/yyyy').format(pickedDate);
+              controller.birthOfDateController.text = formattedDate;
+            }
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Tanggal lahir tidak boleh kosong';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhoneField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Phone Number',
+            style: TextStyle(
+                color: Colors.grey[700], fontWeight: FontWeight.w500)),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller.phoneController,
+          keyboardType: TextInputType.phone,
+          decoration: _buildInputDecoration(
+            hint: '81234567890',
+            icon: Icons.phone_outlined, 
+          ).copyWith(
+            prefixIcon: Container(
+              padding: const EdgeInsets.fromLTRB(12, 14, 8, 14),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('(+62)',
+                      style: TextStyle(color: Colors.grey[700], fontSize: 16)),
+                ],
+              ),
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Nomor telepon tidak boleh kosong';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
 
   Widget _buildRegisterButton() {
     return Obx(() => SizedBox(
           width: double.infinity,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: c3_medGreen, // Sesuai gambar
+              backgroundColor: c3_medGreen, 
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(

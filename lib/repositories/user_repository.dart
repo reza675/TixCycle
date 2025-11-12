@@ -24,4 +24,7 @@ class UserRepository {
       rethrow;
     }
   }
+  Future<void> updateProfilUser(String userId, Map<String, dynamic> data) async {
+    await _firestoreService.updateData(path: '$_collectionPath/$userId', data: data);
+  }
 }

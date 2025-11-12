@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tixcycle/models/ticket_model.dart';
+import 'package:tixcycle/models/ticket_model.dart'; 
 
 class EventModel {
   final String id;
