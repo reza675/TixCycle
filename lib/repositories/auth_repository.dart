@@ -3,8 +3,6 @@ import 'package:tixcycle/models/user_model.dart';
 import 'package:tixcycle/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tixcycle/repositories/user_repository.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tixcycle/models/user_model.dart';
 
 class AuthRepository{
   final AuthService _authService;

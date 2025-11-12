@@ -42,6 +42,9 @@ class _BerandaPageState extends State<BerandaPage> {
       setState(() {
         currentIndex = index;
       });
+    } else if (index == 1) { 
+      
+      Get.toNamed(AppRoutes.MY_TICKETS);
     } else if (index == 4) {
       Get.toNamed(AppRoutes.PROFILE); 
     } else {

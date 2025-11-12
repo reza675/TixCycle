@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tixcycle/models/cart_item_model.dart';
 import 'package:tixcycle/models/transaction_model.dart';
 import 'package:tixcycle/models/payment_method_model.dart';
+import 'package:tixcycle/services/firestore_service.dart';
 import 'package:tixcycle/services/payment_service.dart';
 
 class PaymentRepository {
   final PaymentService _service;
-  PaymentRepository(this._service);
+  final FirestoreService _firestoreService;
+  PaymentRepository(this._service, this._firestoreService);
 
   
   Future<List<PaymentMethodModel>> fetchPaymentMethods() {
@@ -50,5 +52,24 @@ class PaymentRepository {
   Future<TransactionModel> saveTransactionToFirebase(
       TransactionModel transaction) async {
     return _service.createTransaction(transaction);
+  }
+
+  Future<List<TransactionModel>> getTransactionsForUser(String userId) async {
+    try {
+      final querySnapshot = await _firestoreService.getQuery(
+        collectionPath: 'transactions', 
+        whereField: 'userId',
+        isEqualTo: userId,
+        orderBy: 'createdAt', 
+        descending: true,
+      );
+      
+      return querySnapshot.docs
+          .map((doc) => TransactionModel.fromSnapshot(doc))
+          .toList();
+    } catch (e) {
+      print("Error fetching transactions for user $userId: $e");
+      rethrow;
+    }
   }
 }

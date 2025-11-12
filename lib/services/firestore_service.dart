@@ -43,16 +43,24 @@ class FirestoreService {
   }
 
   Future<QuerySnapshot> getQuery({
-    // filter data berdasarkan kondisi
     required String collectionPath,
     required String whereField,
     required dynamic isEqualTo,
+    String? orderBy, 
+    bool descending = false, 
   }) async {
     try {
-      final reference = _database.collection(collectionPath);
-      return await reference.where(whereField, isEqualTo: isEqualTo).get();
+      Query query = _database
+          .collection(collectionPath)
+          .where(whereField, isEqualTo: isEqualTo);
+
+      if (orderBy != null) {
+        query = query.orderBy(orderBy, descending: descending);
+      }
+
+      return await query.get();
     } catch (e) {
-      print("Error getting query: $e");
+      print(e);
       rethrow;
     }
   }
@@ -62,11 +70,12 @@ class FirestoreService {
     required String collectionPath,
     required int limit,
     required String orderBy,
+    bool descending = false,
     DocumentSnapshot? startAfter,
   }) async {
     try {
       Query query =
-          _database.collection(collectionPath).orderBy(orderBy).limit(limit);
+          _database.collection(collectionPath).orderBy(orderBy, descending: descending).limit(limit);
 
       if (startAfter != null) {
         query = query.startAfterDocument(startAfter);

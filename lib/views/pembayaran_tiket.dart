@@ -674,6 +674,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
           (order != null && order.purchasedItems.isNotEmpty);
 
       if (order == null || !hasTickets) {
+       
         return _buildStep4GenericSelesai(context);
       }
 
@@ -685,11 +686,16 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             const SizedBox(height: 20),
             _buildTicketEventTimeSection(event),
             const SizedBox(height: 20),
+            
             _buildTicketListCard(order.purchasedItems),
+         
             const SizedBox(height: 20),
             _buildPurchaseDetailCard(order),
             const SizedBox(height: 20),
-            _buildQrCodeButton(),
+            
+            _buildMyTicketsButton(), 
+    
+
             const SizedBox(height: 80),
           ],
         ),
@@ -780,77 +786,106 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
   }
 
 Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
-  final firstTicket = allTickets.first;
-  final bool hasMultipleTickets = allTickets.length > 1;
-
-  Widget buildTicketDetails(PurchasedTicketItem ticket) {
-    return Column(
-      children: [
-        _buildDetailRow("Tipe Tiket", ticket.categoryName),
-        _buildDetailRow("Nomor Kursi", ticket.seatNumber),
-        _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
-            isPrice: true),
-        Divider(color: Colors.grey[300], height: 24),
-        _buildDetailRow("ID Tiket", ticket.ticketId),
-      ],
-    );
-  }
-
-  Widget buildExpansionDivider() {
-    return Divider(
-      color: Colors.grey[400],
-      height: 24,
-      thickness: 1,
-    );
-  }
-
-  return Card(
-    color: Colors.white,
-    elevation: 4,
-    shadowColor: Colors.black.withOpacity(0.2),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    clipBehavior: Clip.antiAlias,
-    child: Padding(
-      padding: const EdgeInsets.all(16.0), 
-      child: Column(
-        children: [
-          buildTicketDetails(firstTicket),
-          if (hasMultipleTickets) ...[
-            buildExpansionDivider(), 
-            ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: EdgeInsets.zero,
-              trailing: const SizedBox.shrink(),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Lihat ${allTickets.length - 1} Pesanan Lainnya",
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+    
+    // Helper widget untuk membangun detail (sekarang bisa diklik)
+    Widget buildTicketDetails(PurchasedTicketItem ticket, {bool isFirst = false}) {
+      return InkWell( // <-- Tambahkan InkWell di sini
+        onTap: () {
+          // Navigasi ke halaman detail QR code
+          Get.toNamed(AppRoutes.TICKET_DETAIL, arguments: ticket);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            children: [
+              _buildDetailRow("Tipe Tiket", ticket.categoryName),
+              _buildDetailRow("Nomor Kursi", ticket.seatNumber),
+              _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
+                  isPrice: true),
+              Divider(color: Colors.grey[300], height: 24),
+              _buildDetailRow("ID Tiket", ticket.ticketId),
+              // --- TAMBAHAN BARU ---
+              if (isFirst) // Hanya tampilkan ini di tiket pertama
+                Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        "Tampilkan QR Code",
+                        style: TextStyle(fontSize: 13, color: c3, fontWeight: FontWeight.bold),
+                      ),
+                      Icon(Icons.qr_code_2, color: c3, size: 18),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.keyboard_arrow_down,
-                      color: Colors.grey[600], size: 18),
-                ],
-              ),
-              children: allTickets.skip(1).map((ticket) {
-                return Column(
+                ),
+              // -----------------------
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Helper widget untuk divider
+    Widget buildExpansionDivider() {
+      return Divider(color: Colors.grey[400], height: 24, thickness: 1);
+    }
+    
+    final firstTicket = allTickets.first;
+    final bool hasMultipleTickets = allTickets.length > 1;
+
+    // Tampilan Card utama
+    return Card(
+      color: Colors.white,
+      elevation: 4,
+      shadowColor: Colors.black.withOpacity(0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Tiket pertama (selalu tampil)
+            buildTicketDetails(firstTicket, isFirst: true), 
+            
+            // Tiket sisa (di dalam ExpansionTile)
+            if (hasMultipleTickets) ...[
+              buildExpansionDivider(),
+              ExpansionTile(
+                // ... (properti ExpansionTile tetap sama) ...
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: EdgeInsets.zero,
+                trailing: const SizedBox.shrink(),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    buildExpansionDivider(),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: buildTicketDetails(ticket),
+                    Text(
+                      "Lihat ${allTickets.length - 1} Tiket Lainnya",
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
                     ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.keyboard_arrow_down,
+                        color: Colors.grey[600], size: 18),
                   ],
-                );
-              }).toList(),
-            ),
-          ]
-        ],
+                ),
+                children: allTickets.skip(1).map((ticket) {
+                  return Column(
+                    children: [
+                      buildExpansionDivider(),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: buildTicketDetails(ticket, isFirst: false), // Buat tiket ini bisa diklik
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ]
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
   Widget _buildPurchaseDetailCard(TransactionModel order) {
     final String nomorPesanan = order.id;
     final String tanggalPembelian =
@@ -1014,5 +1049,29 @@ Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
                         fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ));
+  }
+
+  Widget _buildMyTicketsButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: c3,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: () {
+          // Arahkan ke halaman "Tiket Saya"
+          Get.offAllNamed(AppRoutes.MY_TICKETS);
+        },
+        child: const Text(
+          "Lihat Semua Tiket Saya",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
   }
 }

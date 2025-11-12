@@ -24,17 +24,49 @@ class PaymentService {
     ];
   }
 
-  Future<TransactionModel> createTransaction(TransactionModel transactionData) async{
+  Future<TransactionModel> createTransaction(
+      TransactionModel transactionData) async {
+    final _db = FirebaseFirestore.instance;
+    WriteBatch batch = _db.batch();
+
     try {
-      final docRef = await FirebaseFirestore.instance.collection('transactions').add(transactionData.toJson());
+      final transactionRef = _db.collection('transactions').doc();
+      final transactionJson = transactionData.toJson();
+      
+      final List<Map<String, dynamic>> purchasedItems =
+          transactionJson['purchasedItems'] as List<Map<String, dynamic>>;
 
-      final newDoc = await docRef.get();
-      final newTransaction = TransactionModel.fromSnapshot(newDoc);
-      return newTransaction;
+      if (purchasedItems.isEmpty) {
+        throw Exception("Tidak ada tiket untuk dibeli.");
+      }
 
+      for (var item in purchasedItems) {
+        final String ticketId = item['ticketId']; 
+        final ticketRef = _db.collection('purchased_tickets').doc(ticketId);
+        
+        batch.set(ticketRef, {
+          'transactionId': transactionRef.id, 
+          'eventId': transactionData.eventId,
+          'userId': transactionData.userId,
+          'categoryName': item['categoryName'],
+          'price': item['price'],
+          'seatNumber': item['seatNumber'],
+          'isCheckedIn': false, 
+          'checkInTime': null,
+          'createdAt': transactionData.createdAt, // waktu pembelian
+        });
+      }
+
+      batch.set(transactionRef, transactionJson);
+
+      await batch.commit();
+
+      return transactionData.copyWith(id: transactionRef.id);
     } catch (e) {
-      print('Error creating transaction: $e');
+      print('Error creating transaction batch: $e');
       rethrow;
     }
   }
+
+
 }

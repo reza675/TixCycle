@@ -1,5 +1,9 @@
 import 'package:get/get.dart';
+import 'package:tixcycle/bindings/admin_ticket_scanner_binding.dart';
+import 'package:tixcycle/bindings/my_tickets_binding.dart';
 import 'package:tixcycle/bindings/splash_binding.dart';
+import 'package:tixcycle/views/admin_ticket_scanner_page.dart';
+import 'package:tixcycle/views/my_tickets_page.dart';
 import 'package:tixcycle/views/splash_screen.dart';
 import 'package:tixcycle/bindings/detail_event_binding.dart';
 import 'package:tixcycle/bindings/beli_tiket_binding.dart';
@@ -17,6 +21,7 @@ import 'package:tixcycle/views/pembayaran_tiket.dart';
 import 'package:tixcycle/views/profile_page.dart';
 import 'package:tixcycle/bindings/edit_profile_binding.dart';
 import 'package:tixcycle/views/edit_profile_page.dart';
+import 'package:tixcycle/views/ticket_detail_page.dart';
 
 class AppPages {
   // rute/halaman pertama (nanti diganti splash)
@@ -32,5 +37,8 @@ class AppPages {
     GetPage(name: AppRoutes.CHECKOUT, page: ()=> const PembayaranTiket(), binding: PembayaranBinding()), // pembayaran tiket
     GetPage(name: AppRoutes.PROFILE, page: ()=> const ProfilePage()),// profile page
     GetPage(name: AppRoutes.EDIT_PROFILE, page: ()=> const EditProfilePage(), binding: EditProfileBinding()), // edit profile
+    GetPage(name: AppRoutes.MY_TICKETS,page: () => const MyTicketsPage(),binding: MyTicketsBinding(),),
+    GetPage(name: AppRoutes.TICKET_DETAIL,page: () => const TicketDetailPage(),),
+    GetPage(name: AppRoutes.ADMIN_SCANNER,page: () => const AdminTicketScannerPage(),binding: AdminTicketScannerBinding(),),
   ];
 }
