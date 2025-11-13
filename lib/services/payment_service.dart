@@ -118,6 +118,7 @@ class PaymentService {
 
       await batch.commit();
 
+      // Return transaction with purchasedItems populated
       return transactionData.copyWith(
         id: transactionRef.id,
         purchasedItems: purchasedTicketsList,
