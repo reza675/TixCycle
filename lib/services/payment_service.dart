@@ -30,20 +30,16 @@ class PaymentService {
     WriteBatch batch = _db.batch();
 
     try {
-      
       final transactionRef = _db.collection('transactions').doc();
-      final transactionJson = transactionData.toJson();
-
       
-      final List<Map<String, dynamic>> purchasedItems =
+      final transactionJson = transactionData.toJson();
+      final List<Map<String, dynamic>> itemsForFirestore =
           transactionJson['purchasedItems'] as List<Map<String, dynamic>>;
 
-      if (purchasedItems.isEmpty) {
+      if (itemsForFirestore.isEmpty) {
         throw Exception("Tidak ada tiket untuk dibeli.");
       }
-
-      
-      for (var item in purchasedItems) {
+      for (var item in itemsForFirestore) {
         final String ticketId = item['ticketId'];
         final ticketRef = _db.collection('purchased_tickets').doc(ticketId);
 
@@ -61,11 +57,15 @@ class PaymentService {
       }
 
       batch.set(transactionRef, transactionJson);
-
-      
       await batch.commit();
-      return transactionData.copyWith(id: transactionRef.id);
-      
+      final List<PurchasedTicketItem> parsedItems = itemsForFirestore
+          .map((itemMap) => PurchasedTicketItem.fromJson(itemMap))
+          .toList();
+
+      return transactionData.copyWith(
+        id: transactionRef.id,
+        purchasedItems: parsedItems, 
+      );
 
     } catch (e) {
       print('Error creating transaction batch: $e');
