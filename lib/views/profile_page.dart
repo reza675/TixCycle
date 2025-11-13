@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:tixcycle/controllers/user_account_controller.dart';
 import 'package:tixcycle/models/user_model.dart';
 import 'package:tixcycle/routes/app_routes.dart';
-import 'package:tixcycle/views/widgets/bottom_bar.dart'; 
+import 'package:tixcycle/views/widgets/bottom_bar.dart';
 
 const Color c1_cream = Color(0xFFFFF8E2);
 const Color c2_lightGreen = Color(0xFFB3CC86);
@@ -20,7 +20,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  int currentIndex = 4; 
+  int currentIndex = 4;
 
   void _handleNavigation(int index) {
     final userAccountController = Get.find<UserAccountController>();
@@ -34,6 +34,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (index == 0) {
       Get.offAllNamed(AppRoutes.BERANDA);
+    } else if (index == 1) {
+      Get.offAllNamed(AppRoutes.MY_TICKETS);
+    } else if (index == 3) {
+      Get.snackbar("Info", "Halaman Koin belum diimplementasikan.");
     } else if (index == 4) {
       setState(() {
         currentIndex = index;
@@ -57,8 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        extendBody: true, 
-        
+        extendBody: true,
         bottomNavigationBar: CurvedBottomBar(
           currentIndex: currentIndex,
           onTap: (i) => _handleNavigation(i),
@@ -67,57 +70,52 @@ class _ProfilePageState extends State<ProfilePage> {
         floatingActionButton: CenterActionButton(
           onPressed: () => _handleNavigation(2),
         ),
-
         body: SafeArea(
-          child: Builder(
-            builder: (BuildContext newContext) { 
-              return Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          child: Builder(builder: (BuildContext newContext) {
+            return Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                if (controller.userProfile.value == null) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Anda belum login"),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () => Get.offAllNamed(AppRoutes.LOGIN),
-                          child: const Text("Login Sekarang"),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+              if (controller.userProfile.value == null) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Anda belum login"),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () => Get.offAllNamed(AppRoutes.LOGIN),
+                        child: const Text("Login Sekarang"),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-                final UserModel user = controller.userProfile.value!;
+              final UserModel user = controller.userProfile.value!;
 
-                if (user.email == "tixcycleproject@gmail.com") {
-                  return _buildAdminProfileBody(newContext, controller, user);
-                } else {
-                  return _buildUserProfileBody(newContext, controller, user);
-                }
-
-              });
-            }
-          ),
+              if (user.email == "tixcycleproject@gmail.com") {
+                return _buildAdminProfileBody(newContext, controller, user);
+              } else {
+                return _buildUserProfileBody(newContext, controller, user);
+              }
+            });
+          }),
         ),
       ),
     );
   }
 
-  Widget _buildUserProfileBody(BuildContext newContext, UserAccountController controller, UserModel user) {
+  Widget _buildUserProfileBody(BuildContext newContext,
+      UserAccountController controller, UserModel user) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          
-          _buildManualAppBar(), 
-
+          _buildManualAppBar(),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white, 
+              color: Colors.white,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),
                 topRight: Radius.circular(24),
@@ -138,23 +136,24 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildInfoSection(
                   title: "Info Akun",
                   children: [
-                    _buildPersonalInfoItem("No. Telepon", user.phoneNumber ?? "Belum diatur"),
+                    _buildPersonalInfoItem(
+                        "No. Telepon", user.phoneNumber ?? "Belum diatur"),
                     _buildPersonalInfoItem("Email", user.email),
-                    _buildPersonalInfoItem("Tipe ID", user.idType ?? "Belum diatur"),
-                    _buildPersonalInfoItem("Nomor Identitas", user.idNumber ?? "Belum diatur"),
+                    _buildPersonalInfoItem(
+                        "Tipe ID", user.idType ?? "Belum diatur"),
+                    _buildPersonalInfoItem(
+                        "Nomor Identitas", user.idNumber ?? "Belum diatur"),
                   ],
-                
                 ),
                 const SizedBox(height: 24),
                 _buildInfoSection(
                   title: "Info Pribadi",
-                  buttonText: "UBAH", 
+                  buttonText: "UBAH",
                   onButtonPressed: () => Get.toNamed(AppRoutes.EDIT_PROFILE),
                   children: [
+                    _buildPersonalInfoItem("Nama Lengkap", user.displayName),
                     _buildPersonalInfoItem(
-                        "Nama Lengkap", user.displayName),
-                    _buildPersonalInfoItem(
-                        "Jenis Kelamin", user.gender ?? "Belum diatur"), 
+                        "Jenis Kelamin", user.gender ?? "Belum diatur"),
                     _buildPersonalInfoItem(
                         "Tanggal Lahir",
                         user.birthOfDate != null
@@ -163,15 +162,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             : "Belum diatur"),
                     _buildPersonalInfoItem(
                         "Provinsi", user.province ?? "Belum diatur"),
-                    _buildPersonalInfoItem("Kota / Kabupaten", user.city ??
-                        "Belum diatur"),
                     _buildPersonalInfoItem(
-                        "Pekerjaan", user.occupation ?? "Belum diatur"), 
+                        "Kota / Kabupaten", user.city ?? "Belum diatur"),
+                    _buildPersonalInfoItem(
+                        "Pekerjaan", user.occupation ?? "Belum diatur"),
                   ],
                 ),
                 const SizedBox(height: 32),
                 _buildLogoutButton(controller),
-                const SizedBox(height: 80), 
+                const SizedBox(height: 80),
               ],
             ),
           ),
@@ -180,16 +179,15 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildAdminProfileBody(BuildContext newContext, UserAccountController controller, UserModel user) {
-     return SingleChildScrollView(
+  Widget _buildAdminProfileBody(BuildContext newContext,
+      UserAccountController controller, UserModel user) {
+    return SingleChildScrollView(
       child: Column(
         children: [
-          
-          _buildManualAppBar(), 
-
+          _buildManualAppBar(),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white, 
+              color: Colors.white,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),
                 topRight: Radius.circular(24),
@@ -205,39 +203,37 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                _buildProfileHeader(user, controller), 
+                _buildProfileHeader(user, controller),
                 const SizedBox(height: 24),
-                
                 _buildInfoSection(
                   title: "Info Akun",
-                  buttonText: "UBAH", 
-                  onButtonPressed: () => Get.toNamed(AppRoutes.EDIT_PROFILE), 
+                  buttonText: "UBAH",
+                  onButtonPressed: () => Get.toNamed(AppRoutes.EDIT_PROFILE),
                   children: [
                     _buildPersonalInfoItem("Email", user.email),
-                    _buildPersonalInfoItem("Tipe ID", user.idType ?? "Belum diatur"),
-                    _buildPersonalInfoItem("Nomor Identitas", user.idNumber ?? "Belum diatur"),
+                    _buildPersonalInfoItem(
+                        "Tipe ID", user.idType ?? "Belum diatur"),
+                    _buildPersonalInfoItem(
+                        "Nomor Identitas", user.idNumber ?? "Belum diatur"),
                   ],
                 ),
-              
                 const SizedBox(height: 24),
-
                 _buildAdminButton(
-                  text: "Kelola Data Tiket", 
-                  onPressed: () {
-                    Get.snackbar("Info", "Halaman Kelola Data Tiket (Admin) belum ada.");
-                  }
-                ),
+                    text: "Kelola Data Tiket",
+                    onPressed: () {
+                      Get.snackbar("Info",
+                          "Halaman Kelola Data Tiket (Admin) belum ada.");
+                    }),
                 const SizedBox(height: 16),
                 _buildAdminButton(
-                  text: "Tampil Kode QR", 
-                  onPressed: () {
-                    Get.snackbar("Info", "Halaman Tampil Kode QR (Admin) belum ada.");
-                  }
-                ),
-
+                    text: "Tampil Kode QR",
+                    onPressed: () {
+                      Get.snackbar(
+                          "Info", "Halaman Tampil Kode QR (Admin) belum ada.");
+                    }),
                 const SizedBox(height: 32),
                 _buildLogoutButton(controller),
-                const SizedBox(height: 80), 
+                const SizedBox(height: 80),
               ],
             ),
           ),
@@ -245,6 +241,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+
   Widget _buildManualAppBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
@@ -252,14 +249,12 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back, color: c4_darkGreen),
-            onPressed: () => Get.offAllNamed(AppRoutes.BERANDA), 
+            onPressed: () => Get.offAllNamed(AppRoutes.BERANDA),
           ),
           const Text(
             'Profile',
             style: TextStyle(
-                color: c4_darkGreen,
-                fontSize: 20, 
-                fontWeight: FontWeight.bold),
+                color: c4_darkGreen, fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -271,22 +266,21 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(4), 
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.white, 
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: c4_darkGreen, 
-                width: 3,            
-              ),
-              boxShadow: [
-                 BoxShadow(
-                   color: c4_darkGreen.withOpacity(0.3),
-                   blurRadius: 8,
-                   offset: const Offset(0, 4),
-                 )
-              ]
-            ),
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: c4_darkGreen,
+                  width: 3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: c4_darkGreen.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ]),
             child: Stack(
               children: [
                 CircleAvatar(
@@ -312,7 +306,11 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: c3_medGreen,
                         shape: BoxShape.circle,
                       ),
-                      child: Image(image: const AssetImage('images/profile/canvas.png'), height: 16, width: 16,),
+                      child: Image(
+                        image: const AssetImage('images/profile/canvas.png'),
+                        height: 16,
+                        width: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -323,9 +321,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Text(
             user.displayName,
             style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: c4_darkGreen),
+                fontSize: 20, fontWeight: FontWeight.bold, color: c4_darkGreen),
           ),
         ],
       ),
@@ -342,7 +338,7 @@ class _ProfilePageState extends State<ProfilePage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: c1_cream, 
+        color: c1_cream,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -394,10 +390,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Text(
             label,
             style: const TextStyle(
-              color: c4_darkGreen, 
-              fontSize: 14,
-              fontWeight: FontWeight.bold 
-            ),
+                color: c4_darkGreen, fontSize: 14, fontWeight: FontWeight.bold),
           ),
           Expanded(
             child: Text(
@@ -421,7 +414,7 @@ class _ProfilePageState extends State<ProfilePage> {
       child: ElevatedButton(
         onPressed: () async {
           await controller.signOut();
-          Get.offAllNamed(AppRoutes.BERANDA); 
+          Get.offAllNamed(AppRoutes.BERANDA);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.grey[700],
@@ -439,13 +432,14 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildAdminButton({required String text, required VoidCallback onPressed}) {
+  Widget _buildAdminButton(
+      {required String text, required VoidCallback onPressed}) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: c3_medGreen, 
+          backgroundColor: c3_medGreen,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
