@@ -270,8 +270,7 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
           icon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
-            if (value == null || value.isEmpty)
-              return 'Email tidak boleh kosong';
+            if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
             if (!GetUtils.isEmail(value)) return 'Format email tidak valid';
             return null;
           },
@@ -671,12 +670,13 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
       final order = controller.finalOrder.value;
       final event = controller.event.value;
 
-      // Jika tidak ada order sama sekali, tampilkan generic
-      if (order == null) {
+      final bool hasTickets =
+          (order != null && order.purchasedItems.isNotEmpty);
+
+      if (order == null || !hasTickets) {
         return _buildStep4GenericSelesai(context);
       }
 
-      // Tampilkan layout lengkap jika ada order (meskipun purchasedItems kosong)
       return SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -685,10 +685,8 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             const SizedBox(height: 20),
             _buildTicketEventTimeSection(event),
             const SizedBox(height: 20),
-            if (order.purchasedItems.isNotEmpty) ...[
-              _buildTicketListCard(order.purchasedItems),
-              const SizedBox(height: 20),
-            ],
+            _buildTicketListCard(order.purchasedItems),
+            const SizedBox(height: 20),
             _buildPurchaseDetailCard(order),
             const SizedBox(height: 20),
             _buildQrCodeButton(),
@@ -742,8 +740,9 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
     final String eventTime = event != null
         ? DateFormat('HH.mm').format(event.date) + " WIB"
         : "Loading...";
-    final String eventLocation =
-        event != null ? "${event.venueName}, ${event.city}" : "Loading...";
+    final String eventLocation = event != null
+        ? "${event.venueName}, ${event.city}"
+        : "Loading...";
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -769,12 +768,9 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow(Icons.calendar_today_outlined, eventDate,
-                    isBold: true),
-                _buildInfoRow(Icons.access_time_outlined, eventTime,
-                    isBold: true),
-                _buildInfoRow(Icons.location_on_outlined, eventLocation,
-                    isBold: true),
+                _buildInfoRow(Icons.calendar_today_outlined, eventDate, isBold: true),
+                _buildInfoRow(Icons.access_time_outlined, eventTime, isBold: true),
+                _buildInfoRow(Icons.location_on_outlined, eventLocation, isBold: true),
               ],
             ),
           ),
@@ -783,79 +779,78 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
     );
   }
 
-  Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
-    final firstTicket = allTickets.first;
-    final bool hasMultipleTickets = allTickets.length > 1;
+Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
+  final firstTicket = allTickets.first;
+  final bool hasMultipleTickets = allTickets.length > 1;
 
-    Widget buildTicketDetails(PurchasedTicketItem ticket) {
-      return Column(
-        children: [
-          _buildDetailRow("Tipe Tiket", ticket.categoryName),
-          _buildDetailRow("Nomor Kursi", ticket.seatNumber),
-          _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
-              isPrice: true),
-          Divider(color: Colors.grey[300], height: 24),
-          _buildDetailRow("ID Tiket", ticket.ticketId),
-        ],
-      );
-    }
-
-    Widget buildExpansionDivider() {
-      return Divider(
-        color: Colors.grey[400],
-        height: 24,
-        thickness: 1,
-      );
-    }
-
-    return Card(
-      color: Colors.white,
-      elevation: 4,
-      shadowColor: Colors.black.withOpacity(0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            buildTicketDetails(firstTicket),
-            if (hasMultipleTickets) ...[
-              buildExpansionDivider(),
-              ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                childrenPadding: EdgeInsets.zero,
-                trailing: const SizedBox.shrink(),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Lihat ${allTickets.length - 1} Pesanan Lainnya",
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.keyboard_arrow_down,
-                        color: Colors.grey[600], size: 18),
-                  ],
-                ),
-                children: allTickets.skip(1).map((ticket) {
-                  return Column(
-                    children: [
-                      buildExpansionDivider(),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: buildTicketDetails(ticket),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ]
-          ],
-        ),
-      ),
+  Widget buildTicketDetails(PurchasedTicketItem ticket) {
+    return Column(
+      children: [
+        _buildDetailRow("Tipe Tiket", ticket.categoryName),
+        _buildDetailRow("Nomor Kursi", ticket.seatNumber),
+        _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
+            isPrice: true),
+        Divider(color: Colors.grey[300], height: 24),
+        _buildDetailRow("ID Tiket", ticket.ticketId),
+      ],
     );
   }
 
+  Widget buildExpansionDivider() {
+    return Divider(
+      color: Colors.grey[400],
+      height: 24,
+      thickness: 1,
+    );
+  }
+
+  return Card(
+    color: Colors.white,
+    elevation: 4,
+    shadowColor: Colors.black.withOpacity(0.2),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    clipBehavior: Clip.antiAlias,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0), 
+      child: Column(
+        children: [
+          buildTicketDetails(firstTicket),
+          if (hasMultipleTickets) ...[
+            buildExpansionDivider(), 
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: EdgeInsets.zero,
+              trailing: const SizedBox.shrink(),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Lihat ${allTickets.length - 1} Pesanan Lainnya",
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.keyboard_arrow_down,
+                      color: Colors.grey[600], size: 18),
+                ],
+              ),
+              children: allTickets.skip(1).map((ticket) {
+                return Column(
+                  children: [
+                    buildExpansionDivider(),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: buildTicketDetails(ticket),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+          ]
+        ],
+      ),
+    ),
+  );
+}
   Widget _buildPurchaseDetailCard(TransactionModel order) {
     final String nomorPesanan = order.id;
     final String tanggalPembelian =
@@ -876,16 +871,15 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
           children: [
             Text(
               "Detail Pembelian",
-              style: TextStyle(
-                  color: c4, fontWeight: FontWeight.bold, fontSize: 16),
+              style:
+                  TextStyle(color: c4, fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 16),
             _buildDetailRow("Nomor Pesanan", nomorPesanan),
             _buildDetailRow("Tanggal Pembelian", tanggalPembelian),
             _buildDetailRow("Metode Pembayaran", metodePembayaran),
             const Divider(color: Colors.transparent, height: 6),
-            _buildDetailRow(
-                "Total Harga", "RP${totalAmount.toStringAsFixed(0)}",
+            _buildDetailRow("Total Harga", "RP${totalAmount.toStringAsFixed(0)}",
                 isPrice: true),
             const SizedBox(height: 4),
           ],
@@ -907,11 +901,11 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
           ),
         ),
         onPressed: () {
-          // Arahkan ke halaman My Tickets
-          Get.offAllNamed(AppRoutes.MY_TICKETS);
+          Get.snackbar(
+              "Info", "Fitur Tampilkan QR Code belum diimplementasikan.");
         },
         child: const Text(
-          "Lihat Tiket Saya",
+          "Tampilkan QR Code",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
@@ -931,36 +925,35 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
                   style: TextStyle(
                       color: Colors.black87,
                       fontSize: 14,
-                      fontWeight:
-                          isBold ? FontWeight.w600 : FontWeight.normal))),
+                      fontWeight: isBold ? FontWeight.w600 : FontWeight.normal))),
         ],
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(label,
-                style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-          ),
-          Expanded(
-            child: Text(value,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                    color: isPrice ? Colors.red : Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14)),
-          ),
-        ],
-      ),
-    );
-  }
+Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100, 
+          child: Text(label,
+              style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+        ),
+        Expanded(
+          child: Text(value,
+              textAlign: TextAlign.right, 
+              style: TextStyle(
+                  color: isPrice ? Colors.red : Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14)),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildStep4GenericSelesai(BuildContext context) {
     return SingleChildScrollView(
