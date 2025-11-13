@@ -665,6 +665,8 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
     );
   }
 
+
+
   Widget _buildStep4Selesai(BuildContext context) {
     return Obx(() {
       final order = controller.finalOrder.value;
@@ -674,10 +676,11 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
           (order != null && order.purchasedItems.isNotEmpty);
 
       if (order == null || !hasTickets) {
-       
+        
         return _buildStep4GenericSelesai(context);
       }
 
+      
       return SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -687,15 +690,16 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             _buildTicketEventTimeSection(event),
             const SizedBox(height: 20),
             
+            
             _buildTicketListCard(order.purchasedItems),
-         
+            
             const SizedBox(height: 20),
             _buildPurchaseDetailCard(order),
             const SizedBox(height: 20),
             
+            
             _buildMyTicketsButton(), 
-    
-
+            
             const SizedBox(height: 80),
           ],
         ),
@@ -774,9 +778,12 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow(Icons.calendar_today_outlined, eventDate, isBold: true),
-                _buildInfoRow(Icons.access_time_outlined, eventTime, isBold: true),
-                _buildInfoRow(Icons.location_on_outlined, eventLocation, isBold: true),
+                _buildInfoRow(Icons.calendar_today_outlined, eventDate,
+                    isBold: true),
+                _buildInfoRow(Icons.access_time_outlined, eventTime,
+                    isBold: true),
+                _buildInfoRow(Icons.location_on_outlined, eventLocation,
+                    isBold: true),
               ],
             ),
           ),
@@ -785,56 +792,37 @@ class PembayaranTiket extends GetView<PembayaranTiketController> {
     );
   }
 
-Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
-    
-    // Helper widget untuk membangun detail (sekarang bisa diklik)
-    Widget buildTicketDetails(PurchasedTicketItem ticket, {bool isFirst = false}) {
-      return InkWell( // <-- Tambahkan InkWell di sini
-        onTap: () {
-          // Navigasi ke halaman detail QR code
-          Get.toNamed(AppRoutes.TICKET_DETAIL, arguments: ticket);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            children: [
-              _buildDetailRow("Tipe Tiket", ticket.categoryName),
-              _buildDetailRow("Nomor Kursi", ticket.seatNumber),
-              _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
-                  isPrice: true),
-              Divider(color: Colors.grey[300], height: 24),
-              _buildDetailRow("ID Tiket", ticket.ticketId),
-              // --- TAMBAHAN BARU ---
-              if (isFirst) // Hanya tampilkan ini di tiket pertama
-                Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        "Tampilkan QR Code",
-                        style: TextStyle(fontSize: 13, color: c3, fontWeight: FontWeight.bold),
-                      ),
-                      Icon(Icons.qr_code_2, color: c3, size: 18),
-                    ],
-                  ),
-                ),
-              // -----------------------
-            ],
-          ),
+  /// [MODIFIED] Kartu daftar tiket (menghapus InkWell & onTap)
+  Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
+    final firstTicket = allTickets.first;
+    final bool hasMultipleTickets = allTickets.length > 1;
+
+    // Helper HANYA untuk menampilkan detail (tidak bisa diklik)
+    Widget buildTicketDetails(PurchasedTicketItem ticket) {
+      return Padding( // <-- Hapus InkWell dari sini
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          children: [
+            _buildDetailRow("Tipe Tiket", ticket.categoryName),
+            _buildDetailRow("Nomor Kursi", ticket.seatNumber),
+            _buildDetailRow("Harga", "RP${ticket.price.toStringAsFixed(0)}",
+                isPrice: true),
+            Divider(color: Colors.grey[300], height: 24),
+            _buildDetailRow("ID Tiket", ticket.ticketId),
+            // Hapus 'Tampilkan QR Code' dari sini
+          ],
         ),
       );
     }
 
-    // Helper widget untuk divider
     Widget buildExpansionDivider() {
-      return Divider(color: Colors.grey[400], height: 24, thickness: 1);
+      return Divider(
+        color: Colors.grey[400],
+        height: 24,
+        thickness: 1,
+      );
     }
-    
-    final firstTicket = allTickets.first;
-    final bool hasMultipleTickets = allTickets.length > 1;
 
-    // Tampilan Card utama
     return Card(
       color: Colors.white,
       elevation: 4,
@@ -846,13 +834,12 @@ Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
         child: Column(
           children: [
             // Tiket pertama (selalu tampil)
-            buildTicketDetails(firstTicket, isFirst: true), 
-            
+            buildTicketDetails(firstTicket),
+
             // Tiket sisa (di dalam ExpansionTile)
             if (hasMultipleTickets) ...[
               buildExpansionDivider(),
               ExpansionTile(
-                // ... (properti ExpansionTile tetap sama) ...
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: EdgeInsets.zero,
                 trailing: const SizedBox.shrink(),
@@ -874,7 +861,7 @@ Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
                       buildExpansionDivider(),
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
-                        child: buildTicketDetails(ticket, isFirst: false), // Buat tiket ini bisa diklik
+                        child: buildTicketDetails(ticket), // Ini tidak lagi bisa diklik
                       ),
                     ],
                   );
@@ -886,6 +873,7 @@ Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
       ),
     );
   }
+
   Widget _buildPurchaseDetailCard(TransactionModel order) {
     final String nomorPesanan = order.id;
     final String tanggalPembelian =
@@ -923,7 +911,8 @@ Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
     );
   }
 
-  Widget _buildQrCodeButton() {
+  /// [MODIFIED] Mengganti _buildQrCodeButton dengan ini
+  Widget _buildMyTicketsButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -936,11 +925,11 @@ Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
           ),
         ),
         onPressed: () {
-          Get.snackbar(
-              "Info", "Fitur Tampilkan QR Code belum diimplementasikan.");
+          // Arahkan ke halaman "Tiket Saya" dan hapus semua halaman sebelumnya
+          Get.offAllNamed(AppRoutes.MY_TICKETS);
         },
         child: const Text(
-          "Tampilkan QR Code",
+          "Lihat Semua Tiket Saya",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
@@ -966,29 +955,29 @@ Widget _buildTicketListCard(List<PurchasedTicketItem> allTickets) {
     );
   }
 
-Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6.0),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 100, 
-          child: Text(label,
-              style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-        ),
-        Expanded(
-          child: Text(value,
-              textAlign: TextAlign.right, 
-              style: TextStyle(
-                  color: isPrice ? Colors.red : Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14)),
-        ),
-      ],
-    ),
-  );
-}
+  Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(label,
+                style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+          ),
+          Expanded(
+            child: Text(value,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                    color: isPrice ? Colors.red : Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14)),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildStep4GenericSelesai(BuildContext context) {
     return SingleChildScrollView(
@@ -1049,29 +1038,5 @@ Widget _buildDetailRow(String label, String value, {bool isPrice = false}) {
                         fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ));
-  }
-
-  Widget _buildMyTicketsButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: c3,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        onPressed: () {
-          // Arahkan ke halaman "Tiket Saya"
-          Get.offAllNamed(AppRoutes.MY_TICKETS);
-        },
-        child: const Text(
-          "Lihat Semua Tiket Saya",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
   }
 }
