@@ -20,6 +20,10 @@ class UserAccountController extends GetxController {
   final Rx<UserModel?> userProfile = Rx<UserModel?>(null);
   var isLoading = false.obs;
 
+  // getter buat role
+  bool get isAdmin => userProfile.value?.role == 'admin';
+  bool get isUser => userProfile.value?.role == 'user';
+
   @override
   void onInit() {
     super.onInit();

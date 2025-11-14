@@ -45,7 +45,17 @@ class _BerandaPageState extends State<BerandaPage> {
     } else if (index == 1) { 
       
       Get.toNamed(AppRoutes.MY_TICKETS);
-    } else if (index == 4) {
+    } else if (index == 2){
+      if(userAccountController.isAdmin){
+        Get.toNamed(AppRoutes.ADMIN_SCANNER);
+      }else {
+        Get.snackbar("Info", "Halaman ini belum diimplementasikan.");
+        // Get.toNamed(AppRoutes.SCAN);
+        // nnati disini kasih halaman scan sampah
+      }
+    } else if (index == 3){
+      Get.snackbar("Info", "Halaman Koin belum diimplementasikan.");
+    }else if (index == 4) {
       Get.toNamed(AppRoutes.PROFILE); 
     } else {
       Get.snackbar("Info", "Halaman ini belum diimplementasikan.");

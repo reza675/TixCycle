@@ -16,6 +16,7 @@ class UserModel {
   final String? gender;
   final String? idType;     
   final String? idNumber;
+  final String role;
 
   UserModel({
     required this.id,
@@ -33,6 +34,7 @@ class UserModel {
     this.gender,
     this.idType,
     this.idNumber,
+    this.role = 'user',
   });
 
   factory UserModel.fromSnapshot(DocumentSnapshot snapshot) {
@@ -53,6 +55,7 @@ class UserModel {
       gender: data['gender'],
       idType: data['idType'],
       idNumber: data['idNumber'],
+      role: data['role'] ?? 'user',
     );
   }
 
@@ -73,6 +76,7 @@ class UserModel {
       gender: json['gender'],
       idType: json['idType'],
       idNumber: json['idNumber'],
+      role: json['role'] ?? 'user',
     );
   }
 
@@ -92,7 +96,8 @@ class UserModel {
         'city': city,
         'gender': gender,
         'idType': idType,
-        'idNumber': idNumber
+        'idNumber': idNumber,
+        'role': role,
       };
     }
 }

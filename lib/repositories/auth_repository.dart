@@ -32,7 +32,7 @@ class AuthRepository{
     User? newUser = userCredential.user;
     
     if (newUser != null){
-      UserModel userProfile = UserModel(id: newUser.uid, username: username, email: email, displayName: displayName, timeCreated: Timestamp.now(),province: province, birthOfDate: birthOfDate, phoneNumber: phoneNumber);
+      UserModel userProfile = UserModel(id: newUser.uid, username: username, email: email, displayName: displayName, timeCreated: Timestamp.now(),province: province, birthOfDate: birthOfDate, phoneNumber: phoneNumber, role: 'user');
       
       await _userRepository.buatProfilUser(userProfile);
     } else {
@@ -64,6 +64,7 @@ class AuthRepository{
             email: user.email ?? '',
             profileImageUrl: user.photoURL,
             timeCreated: Timestamp.now(),
+            role: 'user'
           );
           await _userRepository.buatProfilUser(newUserModel); 
         }

@@ -95,7 +95,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               final UserModel user = controller.userProfile.value!;
 
-              if (user.email == "tixcycleproject@gmail.com") {
+              if (controller.isAdmin) {
                 return _buildAdminProfileBody(newContext, controller, user);
               } else {
                 return _buildUserProfileBody(newContext, controller, user);
