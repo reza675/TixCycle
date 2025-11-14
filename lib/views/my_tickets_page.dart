@@ -6,7 +6,6 @@ import 'package:tixcycle/models/event_model.dart';
 import 'package:tixcycle/routes/app_routes.dart';
 import 'package:intl/intl.dart';
 import 'package:tixcycle/views/widgets/bottom_bar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyTicketsPage extends StatefulWidget {
   const MyTicketsPage({Key? key}) : super(key: key);
@@ -16,9 +15,10 @@ class MyTicketsPage extends StatefulWidget {
 }
 
 class _MyTicketsPageState extends State<MyTicketsPage> {
+
+  MyTicketsController controller = Get.find<MyTicketsController>();
   int currentIndex = 1;
   String selectedFilter = 'Semua';
-  final Map<String, EventModel?> _eventCache = {};
 
   static const Color c1 = Color(0xFFFFF8E2);
   static const Color c2 = Color(0xFFB3CC86);
@@ -71,8 +71,6 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MyTicketsController>();
-
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -223,7 +221,7 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
       }).toList();
     }
 
-    // Show empty state if no transactions for selected month
+    
     if (filteredTransactions.isEmpty && selectedFilter != 'Semua') {
       return Center(
         child: Column(
@@ -280,39 +278,17 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
     );
   }
 
-  Future<EventModel?> _fetchEvent(String eventId) async {
-    if (_eventCache.containsKey(eventId)) {
-      return _eventCache[eventId];
-    }
-
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('events')
-          .doc(eventId)
-          .get();
-
-      if (doc.exists) {
-        final event = EventModel.fromSnapshot(doc);
-        _eventCache[eventId] = event;
-        return event;
-      }
-    } catch (e) {
-      print('Error fetching event: $e');
-    }
-
-    _eventCache[eventId] = null;
-    return null;
-  }
-
   Widget _buildTransactionItem(TransactionModel transaction, int index) {
     final dateStr = DateFormat('dd MMMM yyyy, HH:mm', 'id_ID')
         .format(transaction.createdAt.toDate());
 
     return FutureBuilder<EventModel?>(
-      future: _fetchEvent(transaction.eventId),
+      future: controller.getEventById(transaction.eventId),
       builder: (context, snapshot) {
-        final eventName = snapshot.data?.name ?? 'Event';
-
+        var eventName = 'Memuat event...';
+        if (snapshot.connectionState == ConnectionState.done) {
+          eventName = snapshot.data?.name ?? 'Event Tidak Ditemukan';
+        }
         return Container(
           margin: const EdgeInsets.only(bottom: 16.0),
           decoration: BoxDecoration(
@@ -409,7 +385,7 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              "WAKTU YANG DI NANTI",
+                              "Detail Tiket",
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -487,14 +463,11 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
                                 onPressed: () {
                                   Get.toNamed(
                                     AppRoutes.TICKET_DETAIL,
-                                    arguments: {
-                                      'ticket': ticket,
-                                      'event': snapshot.data,
-                                    },
+                                    arguments: ticket,
                                   );
                                 },
                                 child: const Text(
-                                  "Lihat Tiket",
+                                  "Lihat QR Tiket",
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,

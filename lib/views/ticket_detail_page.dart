@@ -66,36 +66,36 @@ class TicketDetailPage extends StatelessWidget {
                 children: [
                   // QR Code dengan background putih dan heart icon
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        QrImageView(
-                          data: qrData,
-                          version: QrVersions.auto,
-                          size: 220.0,
-                          backgroundColor: Colors.white,
-                        ),
-                        // Heart icon di tengah QR
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Stack(
+                        // Anda pasti memiliki Stack di sini
+                        alignment: Alignment.center,
+                        children: [
+                          QrImageView(
+                            data: qrData,
+                            version: QrVersions.auto,
+                            size: 220.0,
+                            backgroundColor: Colors.white,
+                            errorCorrectionLevel: QrErrorCorrectLevel.H,
                           ),
-                          child: const Icon(
-                            Icons.favorite,
-                            color: Colors.black,
-                            size: 24,
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.recycling,
+                              color: Colors.black,
+                              size: 24,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
+                        ],
+                      )),
                   const SizedBox(height: 24),
                   // Info box
                   Container(
