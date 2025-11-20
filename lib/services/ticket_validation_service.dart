@@ -1,39 +1,62 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tixcycle/models/event_model.dart';
+import 'package:tixcycle/models/purchased_ticket_model.dart';
+import 'package:tixcycle/models/transaction_model.dart';
+import 'package:tixcycle/models/validation_result_model.dart';
 
 class TicketValidationService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<String> checkInTicket(String ticketId) async {
+  Future<ValidationResultModel> checkInTicket(String ticketId) async {
 
-    final docRef = _db.collection('purchased_tickets').doc(ticketId);
+    final ticketRef = _db.collection('purchased_tickets').doc(ticketId);
+    
 
     try {
-
       return await _db.runTransaction((transaction) async {
-        final snapshot = await transaction.get(docRef);
+        final ticketSnapshot = await transaction.get(ticketRef);
 
-        if (!snapshot.exists) {
+        if (!ticketSnapshot.exists) {
           throw Exception("TIKET TIDAK VALID (Kode tidak ditemukan).");
         }
 
-        final data = snapshot.data() as Map<String, dynamic>;
-        final bool isCheckedIn = data['isCheckedIn'] ?? false;
+        final ticketData = ticketSnapshot.data() as Map<String, dynamic>;
+        final bool isCheckedIn = ticketData['isCheckedIn'] ?? false;
 
         if (isCheckedIn) {
-   
           throw Exception("TIKET SUDAH DIGUNAKAN.");
         }
 
-        transaction.update(docRef, {
+        final String transactionId = ticketData['transactionId'];
+        final String eventId = ticketData['eventId'];
+
+        final transactionRef = _db.collection('transactions').doc(transactionId);
+        final eventRef = _db.collection('events').doc(eventId);
+
+        final transactionSnapshot = await transaction.get(transactionRef);
+        final eventSnapshot = await transaction.get(eventRef);
+
+        if (!transactionSnapshot.exists) {
+          throw Exception("Data transaksi induk tidak ditemukan.");
+        }
+        if (!eventSnapshot.exists) {
+          throw Exception("Data event tidak ditemukan.");
+        }
+
+        transaction.update(ticketRef, {
           'isCheckedIn': true,
           'checkInTime': FieldValue.serverTimestamp(),
         });
-        
-        return "Check-in SUKSES:\n${data['categoryName']} (${data['seatNumber']})";
+
+        final ticketModel = PurchasedTicketModel(id: ticketSnapshot.id, transactionId: ticketData['transactionId'], eventId: ticketData['eventId'], userId: ticketData['userId'], categoryName: ticketData['categoryName'], price: (ticketData['price'] as num).toDouble(), seatNumber: ticketData['seatNumber'], isCheckedIn: true, checkInTime: Timestamp.now());
+        final eventModel = EventModel.fromSnapshot(eventSnapshot);
+        final transactionModel = TransactionModel.fromSnapshot(transactionSnapshot);
+        return ValidationResultModel(ticket: ticketModel, transaction: transactionModel, event: eventModel);
       });
     } on Exception catch (e) {
       rethrow;
     } catch (e) {
+      print("Error in checkInTicket: $e");
       throw Exception("Error: Gagal terhubung ke database.");
     }
   }
