@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tixcycle/models/ticket_model.dart';
 import 'package:tixcycle/services/firestore_service.dart';
@@ -111,7 +113,7 @@ class EventRepository {
 
   Future<void> updateMultipleTicketStocks({
     required String eventId,
-    required Map<String, int> ticketQuantities, // Map of ticketId: quantity
+    required Map<String, int> ticketQuantities, 
   }) async {
     try {
       for (var entry in ticketQuantities.entries) {
@@ -123,6 +125,82 @@ class EventRepository {
       }
     } catch (e) {
       print("Error updating multiple ticket stocks: $e");
+      rethrow;
+    }
+  }
+  Future<void> createEventWithTickets({
+    required EventModel event,
+    required List<TicketModel> tickets,
+  }) async {
+    final _db = FirebaseFirestore.instance;
+    final batch = _db.batch();
+
+    try {
+      final eventRef = _db.collection(_collectionPath).doc(); 
+      
+      final eventData = event.toJson();
+
+      batch.set(eventRef, eventData);
+
+      for (var ticket in tickets) {
+        final ticketRef = eventRef.collection('tickets').doc();
+        batch.set(ticketRef, ticket.toJson());
+      }
+
+      await batch.commit();
+    } catch (e) {
+      print("Error creating event: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> updateEventWithTickets({
+    required EventModel event,
+    required List<TicketModel> tickets,
+    File? newImageFile,
+  }) async {
+    final _db = FirebaseFirestore.instance;
+    final batch = _db.batch();
+
+    try {
+      final eventRef = _db.collection(_collectionPath).doc(event.id);
+
+      batch.update(eventRef, event.toJson());
+
+      for (var ticket in tickets) {
+        if (ticket.id.isNotEmpty) {
+          final ticketRef = eventRef.collection('tickets').doc(ticket.id);
+          batch.update(ticketRef, ticket.toJson());
+        } else {
+          final ticketRef = eventRef.collection('tickets').doc();
+          batch.set(ticketRef, ticket.toJson());
+        }
+      }
+
+      await batch.commit();
+    } catch (e) {
+      print("Error updating event: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    final _db = FirebaseFirestore.instance;
+    final batch = _db.batch();
+
+    try {
+      final eventRef = _db.collection(_collectionPath).doc(eventId);
+
+      final ticketsSnapshot = await eventRef.collection('tickets').get();
+      for (var doc in ticketsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      batch.delete(eventRef);
+
+      await batch.commit();
+    } catch (e) {
+      print("Error deleting event: $e");
       rethrow;
     }
   }

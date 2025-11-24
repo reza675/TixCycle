@@ -221,8 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildAdminButton(
                     text: "Kelola Data Tiket",
                     onPressed: () {
-                      Get.snackbar("Info",
-                          "Halaman Kelola Data Tiket (Admin) belum ada.");
+                      Get.toNamed(AppRoutes.ADMIN_MANAGE_EVENTS);
                     }),
                 const SizedBox(height: 16),
                 _buildAdminButton(
