@@ -22,6 +22,14 @@ import 'package:tixcycle/views/profile_page.dart';
 import 'package:tixcycle/bindings/edit_profile_binding.dart';
 import 'package:tixcycle/views/edit_profile_page.dart';
 import 'package:tixcycle/views/ticket_detail_page.dart';
+import 'package:tixcycle/bindings/add_event_binding.dart';
+import 'package:tixcycle/views/add_event_page.dart';
+import 'package:tixcycle/views/admin_manage_events_page.dart';
+import 'package:tixcycle/bindings/admin_event_binding.dart';
+import 'package:tixcycle/views/admin_event_list_page.dart';
+import 'package:tixcycle/views/update_event_page.dart';
+import 'package:tixcycle/bindings/admin_delete_event_binding.dart';
+import 'package:tixcycle/views/admin_delete_event_page.dart';
 
 class AppPages {
   // rute/halaman pertama (nanti diganti splash)
@@ -40,5 +48,10 @@ class AppPages {
     GetPage(name: AppRoutes.MY_TICKETS,page: () => const MyTicketsPage(),binding: MyTicketsBinding(),),
     GetPage(name: AppRoutes.TICKET_DETAIL,page: () => const TicketDetailPage(),),
     GetPage(name: AppRoutes.ADMIN_SCANNER,page: () => const AdminTicketScannerPage(),binding: AdminTicketScannerBinding(),),
+    GetPage(name: AppRoutes.ADD_EVENT, page: () => const AddEventPage(), binding: AddEventBinding()),
+    GetPage(name: AppRoutes.ADMIN_MANAGE_EVENTS, page: () => const AdminManageEventsPage(),),
+    GetPage(name: AppRoutes.ADMIN_EVENT_LIST,page: () => const AdminEventListPage(),binding: AdminEventListBinding(),),
+    GetPage(name: AppRoutes.UPDATE_EVENT,page: () => const UpdateEventPage(),binding: UpdateEventBinding(),),
+    GetPage(name: AppRoutes.ADMIN_DELETE_EVENT_LIST,page: () => const AdminDeleteEventPage(),binding: AdminDeleteEventBinding(),),
   ];
 }
