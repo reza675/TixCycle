@@ -36,6 +36,12 @@ class _ProfilePageState extends State<ProfilePage> {
       Get.offAllNamed(AppRoutes.BERANDA);
     } else if (index == 1) {
       Get.offAllNamed(AppRoutes.MY_TICKETS);
+    } else if (index == 2) {
+      if (userAccountController.isAdmin) {
+        Get.toNamed(AppRoutes.ADMIN_SCANNER);
+      } else {
+        Get.toNamed(AppRoutes.SCAN);
+      }
     } else if (index == 3) {
       Get.snackbar("Info", "Halaman Koin belum diimplementasikan.");
     } else if (index == 4) {

@@ -37,26 +37,23 @@ class _BerandaPageState extends State<BerandaPage> {
     if (halamanIndeks.contains(index) && !isLoggedIn) {
       Get.toNamed(AppRoutes.LOGIN);
       return;
-    } 
+    }
     if (index == 0) {
       setState(() {
         currentIndex = index;
       });
-    } else if (index == 1) { 
-      
+    } else if (index == 1) {
       Get.toNamed(AppRoutes.MY_TICKETS);
-    } else if (index == 2){
-      if(userAccountController.isAdmin){
+    } else if (index == 2) {
+      if (userAccountController.isAdmin) {
         Get.toNamed(AppRoutes.ADMIN_SCANNER);
-      }else {
-        Get.snackbar("Info", "Halaman ini belum diimplementasikan.");
-        // Get.toNamed(AppRoutes.SCAN);
-        // nnati disini kasih halaman scan sampah
+      } else {
+        Get.toNamed(AppRoutes.SCAN);
       }
-    } else if (index == 3){
+    } else if (index == 3) {
       Get.snackbar("Info", "Halaman Koin belum diimplementasikan.");
-    }else if (index == 4) {
-      Get.toNamed(AppRoutes.PROFILE); 
+    } else if (index == 4) {
+      Get.toNamed(AppRoutes.PROFILE);
     } else {
       Get.snackbar("Info", "Halaman ini belum diimplementasikan.");
       setState(() {
@@ -113,13 +110,14 @@ class _BerandaPageState extends State<BerandaPage> {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
-      final UserAccountController userAccountController = Get.find<UserAccountController>();
+      final UserAccountController userAccountController =
+          Get.find<UserAccountController>();
       final UserModel? userProfile = userAccountController.userProfile.value;
       String displayName;
       if (userProfile != null && userProfile.username.isNotEmpty) {
-        displayName = userProfile.username; 
+        displayName = userProfile.username;
       } else {
-        displayName = "Greenies"; // Fallback jika (belum login) 
+        displayName = "Greenies"; // Fallback jika (belum login)
       }
 
       return SingleChildScrollView(
@@ -151,7 +149,7 @@ class _BerandaPageState extends State<BerandaPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _buildSearchbar(controller),
-            ),  
+            ),
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
@@ -233,8 +231,7 @@ class _BerandaPageState extends State<BerandaPage> {
                               ))
                           .toList(),
                     ),
-                  const SizedBox(
-                      height: 100), 
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
