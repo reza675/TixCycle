@@ -231,10 +231,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     }),
                 const SizedBox(height: 16),
                 _buildAdminButton(
-                    text: "Tampil Kode QR",
+                    text: "QR Code Sampah",
                     onPressed: () {
-                      Get.snackbar(
-                          "Info", "Halaman Tampil Kode QR (Admin) belum ada.");
+                      Get.toNamed(AppRoutes.ADMIN_WASTE_QR);
                     }),
                 const SizedBox(height: 32),
                 _buildLogoutButton(controller),

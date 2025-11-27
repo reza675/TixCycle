@@ -32,6 +32,7 @@ import 'package:tixcycle/views/admin_event_list_page.dart';
 import 'package:tixcycle/views/update_event_page.dart';
 import 'package:tixcycle/bindings/admin_delete_event_binding.dart';
 import 'package:tixcycle/views/admin_delete_event_page.dart';
+import 'package:tixcycle/views/admin_waste_qr_generator_page.dart';
 
 class AppPages {
   // rute/halaman pertama (nanti diganti splash)
@@ -91,6 +92,10 @@ class AppPages {
       name: AppRoutes.ADMIN_SCANNER,
       page: () => const AdminTicketScannerPage(),
       binding: AdminTicketScannerBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.ADMIN_WASTE_QR,
+      page: () => const AdminWasteQRGeneratorPage(),
     ),
     GetPage(
         name: AppRoutes.ADD_EVENT,
