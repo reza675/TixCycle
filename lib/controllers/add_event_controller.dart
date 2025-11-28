@@ -9,8 +9,9 @@ import 'package:tixcycle/models/event_model.dart';
 import 'package:tixcycle/models/ticket_model.dart';
 import 'package:tixcycle/repositories/event_repository.dart';
 import 'package:tixcycle/services/supabase_storage_service.dart';
+import 'package:tixcycle/controllers/beranda_controller.dart';
 
-class AddEventController extends GetxController{
+class AddEventController extends GetxController {
   final EventRepository _eventRepository;
   final SupabaseStorageService _storageService;
   final UserAccountController _userController = Get.find();
@@ -69,7 +70,8 @@ class AddEventController extends GetxController{
     if (picked != null) {
       selectedTime = picked;
       final now = DateTime.now();
-      final dt = DateTime(now.year, now.month, now.day, picked.hour, picked.minute);
+      final dt =
+          DateTime(now.year, now.month, now.day, picked.hour, picked.minute);
       timeC.text = DateFormat('HH.mm').format(dt) + " WIB";
     }
   }
@@ -99,16 +101,14 @@ class AddEventController extends GetxController{
     try {
       isLoading(true);
 
-      
       String imageUrl = '';
       if (selectedImage.value != null) {
-        
         String fileName = 'events/${DateTime.now().millisecondsSinceEpoch}';
         imageUrl = await _storageService.uploadProfileImage(
-            selectedImage.value!, "event_${DateTime.now().millisecondsSinceEpoch}");
+            selectedImage.value!,
+            "event_${DateTime.now().millisecondsSinceEpoch}");
       }
 
-      
       final finalDateTime = DateTime(
         selectedDate!.year,
         selectedDate!.month,
@@ -117,18 +117,17 @@ class AddEventController extends GetxController{
         selectedTime!.minute,
       );
 
-      
       List<TicketModel> tickets = [];
       double startingPrice = double.infinity;
 
       for (var form in ticketForms) {
         final price = double.parse(form['price']!.text);
         final stock = int.parse(form['stock']!.text);
-        
+
         if (price < startingPrice) startingPrice = price;
 
         tickets.add(TicketModel(
-          id: '', 
+          id: '',
           categoryName: form['name']!.text,
           price: price,
           stock: stock,
@@ -137,7 +136,7 @@ class AddEventController extends GetxController{
       }
 
       final event = EventModel(
-        id: '', 
+        id: '',
         name: nameC.text,
         description: descC.text,
         imageUrl: imageUrl,
@@ -148,27 +147,39 @@ class AddEventController extends GetxController{
         organizerId: _userController.userProfile.value?.id ?? 'admin',
         coordinates: const GeoPoint(0, 0),
         startingPrice: startingPrice == double.infinity ? 0 : startingPrice,
-        tickets: [], 
+        tickets: [],
       );
 
-      await _eventRepository.createEventWithTickets(event: event, tickets: tickets);
+      await _eventRepository.createEventWithTickets(
+          event: event, tickets: tickets);
+
+      // Refresh beranda controller untuk update dashboard
+      try {
+        final berandaController = Get.find<BerandaController>();
+        await berandaController.refreshHomepage();
+      } catch (e) {
+        // BerandaController mungkin belum di-load, tidak masalah
+        print("BerandaController not found: $e");
+      }
 
       Get.back();
-      Get.snackbar("Sukses", "Event berhasil dibuat!", 
-        backgroundColor: Colors.green, colorText: Colors.white);
-
+      Get.snackbar("Sukses", "Event berhasil dibuat!",
+          backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {
       print(e);
-      Get.snackbar("Error", "Gagal membuat event: $e", 
-        backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Error", "Gagal membuat event: $e",
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading(false);
     }
   }
 
   bool _validateInputs() {
-    if (nameC.text.isEmpty || venueC.text.isEmpty || cityC.text.isEmpty || 
-        dateC.text.isEmpty || timeC.text.isEmpty) {
+    if (nameC.text.isEmpty ||
+        venueC.text.isEmpty ||
+        cityC.text.isEmpty ||
+        dateC.text.isEmpty ||
+        timeC.text.isEmpty) {
       Get.snackbar("Error", "Mohon lengkapi data utama event");
       return false;
     }
@@ -177,7 +188,9 @@ class AddEventController extends GetxController{
       return false;
     }
     for (var form in ticketForms) {
-      if (form['name']!.text.isEmpty || form['price']!.text.isEmpty || form['stock']!.text.isEmpty) {
+      if (form['name']!.text.isEmpty ||
+          form['price']!.text.isEmpty ||
+          form['stock']!.text.isEmpty) {
         Get.snackbar("Error", "Mohon lengkapi data tiket");
         return false;
       }
@@ -187,8 +200,13 @@ class AddEventController extends GetxController{
 
   @override
   void onClose() {
-    nameC.dispose(); venueC.dispose(); cityC.dispose(); 
-    addressC.dispose(); descC.dispose(); dateC.dispose(); timeC.dispose();
+    nameC.dispose();
+    venueC.dispose();
+    cityC.dispose();
+    addressC.dispose();
+    descC.dispose();
+    dateC.dispose();
+    timeC.dispose();
     for (var form in ticketForms) {
       form.values.forEach((c) => c.dispose());
     }

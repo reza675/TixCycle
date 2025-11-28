@@ -42,6 +42,30 @@ class BerandaController extends GetxController {
         time: const Duration(milliseconds: 500));
   }
 
+  Future<void> refreshHomepage() async {
+    try {
+      isLoading(true);
+
+      // Reset variables
+      _lastDocument = null;
+      hasMoreData.value = true;
+      searchQuery.value = '';
+      isSearchActive.value = false;
+      selectedCity.value = null;
+
+      // Clear existing data
+      featuredEvents.clear();
+      cityEvents.clear();
+      recommendedEvents.clear();
+      _unfilteredRecommendedEvents.clear();
+
+      // Reload data
+      await _initializeHomepage();
+    } catch (e) {
+      Get.snackbar("Error", "Gagal memuat ulang halaman: ${e.toString()}");
+    }
+  }
+
   Future<void> _initializeHomepage() async {
     try {
       isLoading(true);
@@ -82,7 +106,7 @@ class BerandaController extends GetxController {
       if (cityName.isNotEmpty) {
         searchQuery.value = '';
       }
-      
+
       selectedCity.value = cityName.isEmpty ? null : cityName;
 
       if (cityName.isEmpty) {
@@ -91,7 +115,8 @@ class BerandaController extends GetxController {
       } else {
         isSearchActive(true);
         final results = _unfilteredRecommendedEvents
-            .where((event) => event.city.toLowerCase() == cityName.toLowerCase())
+            .where(
+                (event) => event.city.toLowerCase() == cityName.toLowerCase())
             .toList();
         recommendedEvents.assignAll(results);
       }
