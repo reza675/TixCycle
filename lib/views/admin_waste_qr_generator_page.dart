@@ -3,6 +3,11 @@ import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'dart:typed_data';
 
 class AdminWasteQRGeneratorPage extends StatefulWidget {
   const AdminWasteQRGeneratorPage({Key? key}) : super(key: key);
@@ -19,6 +24,7 @@ class _AdminWasteQRGeneratorPageState extends State<AdminWasteQRGeneratorPage> {
   static const Color c4 = Color(0xFF3F5135);
 
   final TextEditingController deviceIdController = TextEditingController();
+  final GlobalKey _qrKey = GlobalKey();
 
   // Data sampah dengan poin
   final Map<String, Map<String, dynamic>> wasteData = {
@@ -95,6 +101,75 @@ class _AdminWasteQRGeneratorPageState extends State<AdminWasteQRGeneratorPage> {
       generatedQRData = null;
       deviceIdController.clear();
     });
+  }
+
+  Future<void> downloadQRCode() async {
+    try {
+      // Capture widget as image
+      RenderRepaintBoundary boundary =
+          _qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      String fileName = 'QR_Waste_$timestamp.png';
+
+      if (Platform.isAndroid) {
+        // Untuk Android - simpan ke Pictures atau DCIM
+        final directory = Directory('/storage/emulated/0/Pictures/TixCycle');
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+        
+        final file = File('${directory.path}/$fileName');
+        await file.writeAsBytes(pngBytes);
+
+        // Scan file agar muncul di galeri
+        if (Platform.isAndroid) {
+          // Trigger media scanner
+          Process.run('am', [
+            'broadcast',
+            '-a',
+            'android.intent.action.MEDIA_SCANNER_SCAN_FILE',
+            '-d',
+            'file://${file.path}'
+          ]);
+        }
+
+        Get.snackbar(
+          'Berhasil',
+          'QR Code tersimpan di Galeri!\nFolder: Pictures/TixCycle',
+          backgroundColor: c2.withOpacity(0.8),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 4),
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        // Untuk platform lain
+        final directory = await getApplicationDocumentsDirectory();
+        final file = File('${directory.path}/$fileName');
+        await file.writeAsBytes(pngBytes);
+
+        Get.snackbar(
+          'Berhasil',
+          'QR Code tersimpan!\n$fileName',
+          backgroundColor: c2.withOpacity(0.8),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 4),
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      print('Error downloading QR: $e');
+      Get.snackbar(
+        'Error',
+        'Gagal menyimpan QR Code: $e',
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override
@@ -482,18 +557,21 @@ class _AdminWasteQRGeneratorPageState extends State<AdminWasteQRGeneratorPage> {
             ),
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: c3, width: 2),
-            ),
-            child: QrImageView(
-              data: generatedQRData!,
-              version: QrVersions.auto,
-              size: 250.0,
-              backgroundColor: Colors.white,
+          RepaintBoundary(
+            key: _qrKey,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: c3, width: 2),
+              ),
+              child: QrImageView(
+                data: generatedQRData!,
+                version: QrVersions.auto,
+                size: 250.0,
+                backgroundColor: Colors.white,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -515,25 +593,16 @@ class _AdminWasteQRGeneratorPageState extends State<AdminWasteQRGeneratorPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            icon: const Icon(Icons.copy),
+            icon: const Icon(Icons.download),
             label: const Text(
-              'Salin Data QR',
+              'Download QR Code',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
-            onPressed: () {
-              Clipboard.setData(ClipboardData(text: generatedQRData!));
-              Get.snackbar(
-                'Berhasil',
-                'Data QR Code berhasil disalin',
-                backgroundColor: c2.withOpacity(0.8),
-                colorText: Colors.white,
-                snackPosition: SnackPosition.BOTTOM,
-              );
-            },
+            onPressed: downloadQRCode,
           ),
           const SizedBox(height: 12),
           Text(
-            'Screenshot QR Code ini untuk dicetak',
+            'QR Code akan tersimpan di Galeri > Pictures > TixCycle',
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey[600],
