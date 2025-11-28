@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:tixcycle/models/transaction_model.dart';
+import 'package:tixcycle/controllers/ticket_detail_controller.dart';
 import 'package:tixcycle/routes/app_routes.dart';
+import 'package:intl/intl.dart';
 
-class TicketDetailPage extends StatelessWidget {
+// Ubah menjadi GetView<TicketDetailController>
+class TicketDetailPage extends GetView<TicketDetailController> {
   const TicketDetailPage({Key? key}) : super(key: key);
 
   static const Color c1 = Color(0xFFFFF8E2);
@@ -14,16 +16,6 @@ class TicketDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final arguments = Get.arguments;
-    final PurchasedTicketItem ticket;
-    if (arguments is Map<String, dynamic>) {
-      ticket = arguments['ticket'] as PurchasedTicketItem;
-    } else {
-      ticket = arguments as PurchasedTicketItem;
-    }
-
-    final String qrData = ticket.ticketId;
-
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -42,116 +34,184 @@ class TicketDetailPage extends StatelessWidget {
             onPressed: () => Get.back(),
           ),
           title: const Text(
-            "Tampilan Kode QR",
+            "E-Ticket",
             style: TextStyle(
               color: c4,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
           ),
-          centerTitle: false,
+          centerTitle: true,
         ),
-        body: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: c1.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: c3, width: 2),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // QR Code dengan background putih dan heart icon
-                  Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Stack(
-                        // Anda pasti memiliki Stack di sini
-                        alignment: Alignment.center,
-                        children: [
-                          QrImageView(
-                            data: qrData,
-                            version: QrVersions.auto,
-                            size: 220.0,
-                            backgroundColor: Colors.white,
-                            errorCorrectionLevel: QrErrorCorrectLevel.H,
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.recycling,
-                              color: Colors.black,
-                              size: 24,
-                            ),
-                          ),
-                        ],
-                      )),
-                  const SizedBox(height: 24),
-                  // Info box
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: c3.withOpacity(0.3)),
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final ticket = controller.ticketLive.value;
+          if (ticket == null) {
+            return const Center(child: Text("Data tiket tidak ditemukan"));
+          }
+
+          final bool isUsed = ticket.isCheckedIn;
+
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: c1.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: c3, width: 2),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Kode ini hanya berlaku 1x scan",
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[800],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Button Selesai
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: c3,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isUsed)
+                      Container(
+                        height: 220,
+                        width: 220,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        elevation: 2,
-                      ),
-                      onPressed: () {
-                        Get.offAllNamed(AppRoutes.MY_TICKETS);
-                      },
-                      child: const Text(
-                        "Selesai",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check_circle,
+                                size: 60, color: Colors.green[700]),
+                            const SizedBox(height: 16),
+                            Text(
+                              "TIKET SUDAH\nDIGUNAKAN",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            if (ticket.checkInTime != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  DateFormat('dd MMM yyyy, HH:mm')
+                                      .format(ticket.checkInTime!.toDate()),
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey[600]),
+                                ),
+                              ),
+                          ],
+                        ),
+                      )
+                    else
+                      Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              QrImageView(
+                                data: ticket.id,
+                                version: QrVersions.auto,
+                                size: 220.0,
+                                backgroundColor: Colors.white,
+                                errorCorrectionLevel: QrErrorCorrectLevel.H,
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.recycling,
+                                  color: Colors.black,
+                                  size: 24,
+                                ),
+                              ),
+                            ],
+                          )),
+
+                    const SizedBox(height: 24),
+                    
+                    
+                    _buildTicketInfoRow("ID Tiket", ticket.id),
+                    const Divider(height: 24),
+                    _buildTicketInfoRow("Kategori", ticket.categoryName,
+                        isBold: true, size: 18),
+                    const SizedBox(height: 8),
+                    _buildTicketInfoRow("Nomor Kursi", ticket.seatNumber,
+                        isBold: true, size: 16),
+
+                    const SizedBox(height: 32),
+                    
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: c3,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                        onPressed: () {
+                          Get.offAllNamed(AppRoutes.MY_TICKETS);
+                        },
+                        child: const Text(
+                          "Kembali",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildTicketInfoRow(String label, String value,
+      {bool isBold = false, double size = 14}) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
           ),
         ),
-      ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: size,
+            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+            color: c4,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }

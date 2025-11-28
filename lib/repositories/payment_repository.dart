@@ -5,6 +5,7 @@ import 'package:tixcycle/models/transaction_model.dart';
 import 'package:tixcycle/models/payment_method_model.dart';
 import 'package:tixcycle/services/firestore_service.dart';
 import 'package:tixcycle/services/payment_service.dart';
+import 'package:tixcycle/models/purchased_ticket_model.dart';
 
 class PaymentRepository {
   final PaymentService _service;
@@ -43,7 +44,7 @@ class PaymentRepository {
       customerDetails: customerDetails,
       paymentMethodName: selectedMethod.name,
       paymentCode: paymentCode,
-      status: 'pending',
+      status: 'completed',
       createdAt: Timestamp.now(),
     );
 
@@ -71,5 +72,11 @@ class PaymentRepository {
       print("Error fetching transactions for user $userId: $e");
       rethrow;
     }
+  }
+
+  Stream<PurchasedTicketModel> getTicketStream(String ticketId) {
+    return _firestoreService
+        .getDocumentStream('purchased_tickets/$ticketId') 
+        .map((doc) => PurchasedTicketModel.fromSnapshot(doc));
   }
 }
