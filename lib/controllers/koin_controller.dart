@@ -79,7 +79,8 @@ class KoinController extends GetxController {
       }
 
       // 3. Kurangi saldo coin
-      final updateSaldoSuccess = await coinRepository.updateSaldoCoin(-voucher.priceCoins);
+      final updateSaldoSuccess =
+          await coinRepository.updateSaldoCoin(-voucher.priceCoins);
       if (!updateSaldoSuccess) {
         Get.snackbar(
           'Gagal',
@@ -92,7 +93,8 @@ class KoinController extends GetxController {
       }
 
       // 4. Kurangi stock voucher
-      final updateStockSuccess = await voucherRepository.kurangiStockVoucher(voucher.id);
+      final updateStockSuccess =
+          await voucherRepository.kurangiStockVoucher(voucher.id);
       if (!updateStockSuccess) {
         // Rollback: kembalikan coin jika gagal kurangi stock
         await coinRepository.updateSaldoCoin(voucher.priceCoins);
@@ -129,7 +131,8 @@ class KoinController extends GetxController {
         tataCara: voucher.tataCara,
         qrCode: qrCode,
         purchasedAt: DateTime.now(),
-        validUntil: voucher.validUntil ?? DateTime.now().add(Duration(days: 30)),
+        validUntil:
+            voucher.validUntil ?? DateTime.now().add(Duration(days: 30)),
         used: false,
         coinsSpent: voucher.priceCoins,
       );

@@ -133,7 +133,8 @@ class AdminVoucherController extends GetxController {
       );
 
       if (isEditMode.value) {
-        await repository.updateVoucher(editingVoucherId.value, voucher.toJson());
+        await repository.updateVoucher(
+            editingVoucherId.value, voucher.toJson());
         Get.snackbar('Berhasil', 'Voucher berhasil diperbarui');
       } else {
         await repository.createVoucher(voucher);
@@ -180,7 +181,7 @@ class AdminVoucherController extends GetxController {
   void loadVoucherForEdit(VoucherModel voucher) {
     isEditMode.value = true;
     editingVoucherId.value = voucher.id;
-    
+
     nameC.text = voucher.name;
     descriptionC.text = voucher.description;
     priceCoinsC.text = voucher.priceCoins.toString();
@@ -219,7 +220,9 @@ class AdminVoucherController extends GetxController {
       Get.snackbar('Error', 'Nama merchant tidak boleh kosong');
       return false;
     }
-    if (!isEditMode.value && selectedImage.value == null && existingImageUrl.value.isEmpty) {
+    if (!isEditMode.value &&
+        selectedImage.value == null &&
+        existingImageUrl.value.isEmpty) {
       Get.snackbar('Error', 'Gambar voucher harus dipilih');
       return false;
     }

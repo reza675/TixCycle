@@ -62,7 +62,8 @@ class VoucherModel {
       'stock': stock,
       'merchant_name': merchantName,
       'tata_cara': tataCara,
-      'valid_until': validUntil != null ? Timestamp.fromDate(validUntil!) : null,
+      'valid_until':
+          validUntil != null ? Timestamp.fromDate(validUntil!) : null,
       'created_at': Timestamp.fromDate(createdAt),
     };
   }

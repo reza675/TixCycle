@@ -47,30 +47,30 @@ class MyVouchersPage extends StatelessWidget {
               ],
             ),
             child: Obx(() => Row(
-              children: [
-                Expanded(
-                  child: _buildTabButton(
-                    controller: controller,
-                    label: 'Semua',
-                    index: 0,
-                  ),
-                ),
-                Expanded(
-                  child: _buildTabButton(
-                    controller: controller,
-                    label: 'Belum Dipakai',
-                    index: 1,
-                  ),
-                ),
-                Expanded(
-                  child: _buildTabButton(
-                    controller: controller,
-                    label: 'Sudah Dipakai',
-                    index: 2,
-                  ),
-                ),
-              ],
-            )),
+                  children: [
+                    Expanded(
+                      child: _buildTabButton(
+                        controller: controller,
+                        label: 'Semua',
+                        index: 0,
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildTabButton(
+                        controller: controller,
+                        label: 'Belum Dipakai',
+                        index: 1,
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildTabButton(
+                        controller: controller,
+                        label: 'Sudah Dipakai',
+                        index: 2,
+                      ),
+                    ),
+                  ],
+                )),
           ),
 
           // Voucher List
@@ -111,7 +111,7 @@ class MyVouchersPage extends StatelessWidget {
     required int index,
   }) {
     final isSelected = controller.selectedTab.value == index;
-    
+
     return GestureDetector(
       onTap: () => controller.changeTab(index),
       child: Container(
@@ -189,14 +189,15 @@ class MyVouchersPage extends StatelessWidget {
                                 child: Image.network(
                                   voucher.voucherImageUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                                  errorBuilder: (_, __, ___) =>
+                                      _buildPlaceholder(),
                                 ),
                               )
                             : _buildPlaceholder(),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    
+
                     // Voucher Info
                     Expanded(
                       child: Column(
@@ -207,7 +208,7 @@ class MyVouchersPage extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: canUse 
+                              color: canUse
                                   ? const Color(0xFF3F5135)
                                   : Colors.grey,
                             ),
@@ -219,15 +220,14 @@ class MyVouchersPage extends StatelessWidget {
                             'Potongan Rp. ${voucher.discountAmount.toStringAsFixed(0)}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: canUse 
-                                  ? Colors.grey[600]
-                                  : Colors.grey[400],
+                              color:
+                                  canUse ? Colors.grey[600] : Colors.grey[400],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    
+
                     // Status Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -250,7 +250,7 @@ class MyVouchersPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                
+
                 // Purchase & Validity Info
                 Row(
                   children: [
@@ -275,7 +275,8 @@ class MyVouchersPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         color: isExpired ? Colors.red : Colors.grey[600],
-                        fontWeight: isExpired ? FontWeight.bold : FontWeight.normal,
+                        fontWeight:
+                            isExpired ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                   ],
@@ -360,8 +361,18 @@ class MyVouchersPage extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

@@ -17,14 +17,14 @@ class AdminVoucherModal extends StatefulWidget {
 class _AdminVoucherModalState extends State<AdminVoucherModal> {
   final controller = Get.find<AdminVoucherController>();
   final formKey = GlobalKey<FormState>();
-  
+
   late TextEditingController nameController;
   late TextEditingController descController;
   late TextEditingController priceController;
   late TextEditingController discountController;
   late TextEditingController stockController;
   late TextEditingController merchantController;
-  
+
   String selectedCategory = 'Makanan & Minuman';
   final List<String> categories = [
     'Makanan & Minuman',
@@ -34,7 +34,7 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
     'Kesehatan',
     'Lainnya',
   ];
-  
+
   List<TextEditingController> tataCaraControllers = [];
   DateTime? validUntil;
 
@@ -42,7 +42,7 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
   void initState() {
     super.initState();
     final voucher = widget.voucherToEdit;
-    
+
     nameController = TextEditingController(text: voucher?.name ?? '');
     descController = TextEditingController(text: voucher?.description ?? '');
     priceController = TextEditingController(
@@ -54,11 +54,12 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
     stockController = TextEditingController(
       text: voucher?.stock.toString() ?? '',
     );
-    merchantController = TextEditingController(text: voucher?.merchantName ?? '');
-    
+    merchantController =
+        TextEditingController(text: voucher?.merchantName ?? '');
+
     selectedCategory = voucher?.category ?? categories[0];
     validUntil = voucher?.validUntil;
-    
+
     if (voucher != null && voucher.tataCara.isNotEmpty) {
       for (var step in voucher.tataCara) {
         tataCaraControllers.add(TextEditingController(text: step));
@@ -66,7 +67,7 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
     } else {
       tataCaraControllers.add(TextEditingController());
     }
-    
+
     if (voucher != null) {
       controller.existingImageUrl.value = voucher.imageUrl;
     }
@@ -115,7 +116,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.card_giftcard, color: Colors.white, size: 28),
+                  const Icon(Icons.card_giftcard,
+                      color: Colors.white, size: 28),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -151,8 +153,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                       controller: nameController,
                       label: 'Nama Voucher',
                       icon: Icons.label,
-                      validator: (val) => val?.isEmpty ?? true 
-                          ? 'Nama voucher harus diisi' 
+                      validator: (val) => val?.isEmpty ?? true
+                          ? 'Nama voucher harus diisi'
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -163,9 +165,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                       label: 'Deskripsi',
                       icon: Icons.description,
                       maxLines: 3,
-                      validator: (val) => val?.isEmpty ?? true 
-                          ? 'Deskripsi harus diisi' 
-                          : null,
+                      validator: (val) =>
+                          val?.isEmpty ?? true ? 'Deskripsi harus diisi' : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -182,7 +183,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                       value: selectedCategory,
                       decoration: InputDecoration(
                         labelText: 'Kategori',
-                        prefixIcon: const Icon(Icons.category, color: Color(0xFF798E5E)),
+                        prefixIcon: const Icon(Icons.category,
+                            color: Color(0xFF798E5E)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -211,7 +213,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                             keyboardType: TextInputType.number,
                             validator: (val) {
                               if (val?.isEmpty ?? true) return 'Harus diisi';
-                              if (int.tryParse(val!) == null) return 'Harus angka';
+                              if (int.tryParse(val!) == null)
+                                return 'Harus angka';
                               return null;
                             },
                           ),
@@ -225,7 +228,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                             keyboardType: TextInputType.number,
                             validator: (val) {
                               if (val?.isEmpty ?? true) return 'Harus diisi';
-                              if (double.tryParse(val!) == null) return 'Harus angka';
+                              if (double.tryParse(val!) == null)
+                                return 'Harus angka';
                               return null;
                             },
                           ),
@@ -254,7 +258,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                       child: InputDecorator(
                         decoration: InputDecoration(
                           labelText: 'Berlaku Hingga',
-                          prefixIcon: const Icon(Icons.calendar_today, color: Color(0xFF798E5E)),
+                          prefixIcon: const Icon(Icons.calendar_today,
+                              color: Color(0xFF798E5E)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -262,11 +267,11 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                           fillColor: Colors.white,
                         ),
                         child: Text(
-                          validUntil != null 
+                          validUntil != null
                               ? _formatDate(validUntil!)
                               : 'Pilih tanggal kedaluwarsa',
                           style: TextStyle(
-                            color: validUntil != null 
+                            color: validUntil != null
                                 ? const Color(0xFF3F5135)
                                 : Colors.grey,
                           ),
@@ -288,7 +293,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.add_circle, color: Color(0xFF4CAF50)),
+                          icon: const Icon(Icons.add_circle,
+                              color: Color(0xFF4CAF50)),
                           onPressed: () {
                             setState(() {
                               tataCaraControllers.add(TextEditingController());
@@ -344,7 +350,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
                             const SizedBox(width: 8),
                             if (tataCaraControllers.length > 1)
                               IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () {
                                   setState(() {
                                     ctrl.dispose();
@@ -360,61 +367,65 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
 
                     // Action Buttons
                     Obx(() => Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: controller.isLoading.value 
-                                ? null 
-                                : () => Get.back(),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF3F5135),
-                              side: const BorderSide(color: Color(0xFF798E5E)),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              'Batal',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: controller.isLoading.value 
-                                ? null 
-                                : () => _simpanVoucher(isEdit),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFB3CC86),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: controller.isLoading.value
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    isEdit ? 'Update' : 'Simpan',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: controller.isLoading.value
+                                    ? null
+                                    : () => Get.back(),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFF3F5135),
+                                  side: const BorderSide(
+                                      color: Color(0xFF798E5E)),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                          ),
-                        ),
-                      ],
-                    )),
+                                ),
+                                child: const Text(
+                                  'Batal',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: controller.isLoading.value
+                                    ? null
+                                    : () => _simpanVoucher(isEdit),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFB3CC86),
+                                  foregroundColor: Colors.white,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: controller.isLoading.value
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            Colors.white,
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        isEdit ? 'Update' : 'Simpan',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ],
+                        )),
                   ],
                 ),
               ),
@@ -427,8 +438,8 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
 
   Widget _buildImagePicker() {
     return Obx(() {
-      final hasImage = controller.selectedImage.value != null || 
-                       controller.existingImageUrl.value.isNotEmpty;
+      final hasImage = controller.selectedImage.value != null ||
+          controller.existingImageUrl.value.isNotEmpty;
 
       return GestureDetector(
         onTap: controller.pilihGambar,
@@ -580,8 +591,18 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

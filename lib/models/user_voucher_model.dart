@@ -45,8 +45,8 @@ class UserVoucherModel {
       purchasedAt: (data['purchased_at'] as Timestamp).toDate(),
       validUntil: (data['valid_until'] as Timestamp).toDate(),
       used: data['used'] ?? false,
-      usedAt: data['used_at'] != null 
-          ? (data['used_at'] as Timestamp).toDate() 
+      usedAt: data['used_at'] != null
+          ? (data['used_at'] as Timestamp).toDate()
           : null,
       coinsSpent: data['coins_spent'] ?? 0,
     );

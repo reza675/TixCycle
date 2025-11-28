@@ -72,7 +72,7 @@ class DetailVoucherPage extends StatelessWidget {
                     )
                   : _buildPlaceholderImage(),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -88,7 +88,7 @@ class DetailVoucherPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Merchant Name
                   if (voucher.merchantName.isNotEmpty)
                     Text(
@@ -99,7 +99,7 @@ class DetailVoucherPage extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 16),
-                  
+
                   // Discount Amount
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -142,7 +142,7 @@ class DetailVoucherPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Coin Price
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -213,7 +213,7 @@ class DetailVoucherPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Description
                   const Text(
                     'Deskripsi',
@@ -233,7 +233,7 @@ class DetailVoucherPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Tata Cara Penukaran
                   const Text(
                     'Tata Cara Penukaran',
@@ -299,7 +299,7 @@ class DetailVoucherPage extends StatelessWidget {
                       );
                     }),
                   const SizedBox(height: 24),
-                  
+
                   // Validity Period
                   if (voucher.validUntil != null)
                     Container(
@@ -397,8 +397,18 @@ class DetailVoucherPage extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

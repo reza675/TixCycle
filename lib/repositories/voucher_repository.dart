@@ -30,7 +30,7 @@ class VoucherRepository {
           .orderBy('stock')
           .orderBy('price_coins')
           .get();
-      
+
       return snapshot.docs
           .map((doc) => VoucherModel.fromSnapshot(doc))
           .toList();
@@ -100,12 +100,13 @@ class VoucherRepository {
   // Upload gambar voucher ke Firebase Storage
   Future<String?> uploadVoucherImage(File imageFile, String voucherId) async {
     try {
-      final fileName = 'vouchers/${voucherId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final fileName =
+          'vouchers/${voucherId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final ref = _storage.ref().child(fileName);
-      
+
       await ref.putFile(imageFile);
       final downloadUrl = await ref.getDownloadURL();
-      
+
       return downloadUrl;
     } catch (e) {
       print("Error upload gambar voucher: $e");
@@ -146,7 +147,8 @@ class VoucherRepository {
   }
 
   // Update voucher
-  Future<bool> updateVoucher(String voucherId, Map<String, dynamic> data) async {
+  Future<bool> updateVoucher(
+      String voucherId, Map<String, dynamic> data) async {
     try {
       await _vouchersCollection.doc(voucherId).update(data);
       return true;
@@ -184,7 +186,9 @@ class VoucherRepository {
       final data = doc.data() as Map<String, dynamic>?;
       final imageUrl = data?['image_url'] as String?;
 
-      if (imageUrl != null && imageUrl.isNotEmpty && imageUrl.contains('firebase')) {
+      if (imageUrl != null &&
+          imageUrl.isNotEmpty &&
+          imageUrl.contains('firebase')) {
         try {
           final ref = _storage.refFromURL(imageUrl);
           await ref.delete();

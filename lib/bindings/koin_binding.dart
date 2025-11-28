@@ -10,7 +10,7 @@ class KoinBinding extends Bindings {
     // Inject repositories
     Get.lazyPut<CoinRepository>(() => CoinRepository());
     Get.lazyPut<VoucherRepository>(() => VoucherRepository());
-    
+
     // Inject controllers
     Get.lazyPut<KoinController>(
       () => KoinController(
@@ -18,7 +18,7 @@ class KoinBinding extends Bindings {
         Get.find<VoucherRepository>(),
       ),
     );
-    
+
     // Inject AdminVoucherController untuk admin
     Get.lazyPut<AdminVoucherController>(
       () => AdminVoucherController(Get.find<VoucherRepository>()),

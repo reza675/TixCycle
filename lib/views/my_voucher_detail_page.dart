@@ -122,7 +122,7 @@ class MyVoucherDetailPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // QR Code Text
                         Text(
                           voucher.qrCode,
@@ -134,7 +134,7 @@ class MyVoucherDetailPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          canUse 
+                          canUse
                               ? 'Tunjukkan QR code ini ke merchant'
                               : 'QR code tidak dapat digunakan',
                           textAlign: TextAlign.center,
@@ -185,25 +185,25 @@ class MyVoucherDetailPage extends StatelessWidget {
                                 width: double.infinity,
                                 height: 150,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                                errorBuilder: (_, __, ___) =>
+                                    _buildPlaceholder(),
                               ),
                             ),
                           ),
                         const SizedBox(height: 16),
-                        
+
                         // Voucher Name
                         Text(
                           voucher.voucherName,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: canUse 
-                                ? const Color(0xFF3F5135)
-                                : Colors.grey,
+                            color:
+                                canUse ? const Color(0xFF3F5135) : Colors.grey,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        
+
                         // Merchant
                         if (voucher.merchantName.isNotEmpty)
                           Text(
@@ -214,14 +214,17 @@ class MyVoucherDetailPage extends StatelessWidget {
                             ),
                           ),
                         const SizedBox(height: 16),
-                        
+
                         // Discount Amount
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: canUse
-                                  ? [const Color(0xFFB3CC86), const Color(0xFF798E5E)]
+                                  ? [
+                                      const Color(0xFFB3CC86),
+                                      const Color(0xFF798E5E)
+                                    ]
                                   : [Colors.grey[400]!, Colors.grey[600]!],
                             ),
                             borderRadius: BorderRadius.circular(12),
@@ -248,11 +251,11 @@ class MyVoucherDetailPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Divider
                         Divider(color: Colors.grey[300]),
                         const SizedBox(height: 16),
-                        
+
                         // Status Info
                         _buildInfoRow(
                           icon: Icons.monetization_on,
@@ -272,7 +275,8 @@ class MyVoucherDetailPage extends StatelessWidget {
                           icon: Icons.access_time,
                           label: 'Berlaku Hingga',
                           value: _formatDate(voucher.validUntil),
-                          iconColor: isExpired ? Colors.red : const Color(0xFF798E5E),
+                          iconColor:
+                              isExpired ? Colors.red : const Color(0xFF798E5E),
                         ),
                         if (voucher.used && voucher.usedAt != null) ...[
                           const SizedBox(height: 12),
@@ -340,8 +344,18 @@ class MyVoucherDetailPage extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

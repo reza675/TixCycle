@@ -37,7 +37,8 @@ class KoinPage extends StatelessWidget {
           Obx(() {
             if (userController.isAdmin) {
               return IconButton(
-                icon: const Icon(Icons.add_circle, color: Color(0xFF4CAF50), size: 28),
+                icon: const Icon(Icons.add_circle,
+                    color: Color(0xFF4CAF50), size: 28),
                 onPressed: () {
                   Get.dialog(const AdminVoucherModal());
                 },
@@ -69,11 +70,11 @@ class KoinPage extends StatelessWidget {
                 if (controller.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                
+
                 if (controller.voucherList.isEmpty) {
                   return _buildEmptyState();
                 }
-                
+
                 return ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -81,7 +82,8 @@ class KoinPage extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final voucher = controller.voucherList[index];
-                    return _buildVoucherCard(context, voucher, controller, userController);
+                    return _buildVoucherCard(
+                        context, voucher, controller, userController);
                   },
                 );
               }),
@@ -125,7 +127,8 @@ class KoinPage extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          Expanded(child: Column(
+          Expanded(
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
@@ -137,13 +140,13 @@ class KoinPage extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Obx(() => Text(
-                '${controller.saldoCoin} koin',
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              )),
+                    '${controller.saldoCoin} koin',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  )),
             ],
           )),
         ],
@@ -151,7 +154,7 @@ class KoinPage extends StatelessWidget {
     );
   }
 
-  Widget _buildVoucherCard(BuildContext context, VoucherModel voucher, 
+  Widget _buildVoucherCard(BuildContext context, VoucherModel voucher,
       KoinController controller, UserAccountController userController) {
     return Container(
       decoration: BoxDecoration(
@@ -190,7 +193,8 @@ class KoinPage extends StatelessWidget {
                         ? Image.network(
                             voucher.imageUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
+                            errorBuilder: (_, __, ___) =>
+                                _buildPlaceholderImage(),
                           )
                         : _buildPlaceholderImage(),
                   ),
@@ -230,16 +234,20 @@ class KoinPage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Color(0xFF4CAF50), size: 20),
+                          icon: const Icon(Icons.edit,
+                              color: Color(0xFF4CAF50), size: 20),
                           onPressed: () {
-                            Get.dialog(AdminVoucherModal(voucherToEdit: voucher));
+                            Get.dialog(
+                                AdminVoucherModal(voucherToEdit: voucher));
                           },
                           tooltip: 'Edit',
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                          icon: const Icon(Icons.delete,
+                              color: Colors.red, size: 20),
                           onPressed: () {
-                            final adminController = Get.find<AdminVoucherController>();
+                            final adminController =
+                                Get.find<AdminVoucherController>();
                             adminController.hapusVoucher(voucher);
                           },
                           tooltip: 'Hapus',
@@ -248,7 +256,8 @@ class KoinPage extends StatelessWidget {
                     );
                   } else {
                     return InkWell(
-                      onTap: () => _showKonfirmasiTukarDialog(context, voucher, controller),
+                      onTap: () => _showKonfirmasiTukarDialog(
+                          context, voucher, controller),
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -333,7 +342,8 @@ class KoinPage extends StatelessWidget {
     );
   }
 
-  void _showKonfirmasiTukarDialog(BuildContext context, VoucherModel voucher, KoinController controller) {
+  void _showKonfirmasiTukarDialog(
+      BuildContext context, VoucherModel voucher, KoinController controller) {
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(
@@ -375,7 +385,8 @@ class KoinPage extends StatelessWidget {
                       ? Image.network(
                           voucher.imageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _buildPlaceholderImage(),
+                          errorBuilder: (_, __, ___) =>
+                              _buildPlaceholderImage(),
                         )
                       : _buildPlaceholderImage(),
                 ),
@@ -403,31 +414,33 @@ class KoinPage extends StatelessWidget {
                   ),
                 ),
                 child: Obx(() => Column(
-                  children: [
-                    _buildCoinInfoRow(
-                      icon: Icons.monetization_on,
-                      label: 'Harga',
-                      value: '${voucher.priceCoins} koin',
-                      color: const Color(0xFFFFD700),
-                    ),
-                    const Divider(height: 16),
-                    _buildCoinInfoRow(
-                      icon: Icons.account_balance_wallet,
-                      label: 'Saldo Anda',
-                      value: '${controller.saldoCoin} koin',
-                      color: const Color(0xFF798E5E),
-                    ),
-                    const Divider(height: 16),
-                    _buildCoinInfoRow(
-                      icon: Icons.check_circle,
-                      label: 'Sisa',
-                      value: '${controller.saldoCoin.value - voucher.priceCoins} koin',
-                      color: controller.saldoCoin.value >= voucher.priceCoins
-                          ? const Color(0xFF4CAF50)
-                          : Colors.red,
-                    ),
-                  ],
-                )),
+                      children: [
+                        _buildCoinInfoRow(
+                          icon: Icons.monetization_on,
+                          label: 'Harga',
+                          value: '${voucher.priceCoins} koin',
+                          color: const Color(0xFFFFD700),
+                        ),
+                        const Divider(height: 16),
+                        _buildCoinInfoRow(
+                          icon: Icons.account_balance_wallet,
+                          label: 'Saldo Anda',
+                          value: '${controller.saldoCoin} koin',
+                          color: const Color(0xFF798E5E),
+                        ),
+                        const Divider(height: 16),
+                        _buildCoinInfoRow(
+                          icon: Icons.check_circle,
+                          label: 'Sisa',
+                          value:
+                              '${controller.saldoCoin.value - voucher.priceCoins} koin',
+                          color:
+                              controller.saldoCoin.value >= voucher.priceCoins
+                                  ? const Color(0xFF4CAF50)
+                                  : Colors.red,
+                        ),
+                      ],
+                    )),
               ),
               const SizedBox(height: 16),
               Text(
@@ -461,37 +474,39 @@ class KoinPage extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Obx(() => ElevatedButton(
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : () async {
-                              final success = await controller.tukarVoucher(voucher);
-                              if (success) {
-                                Get.back();
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB3CC86),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        elevation: 2,
-                      ),
-                      child: controller.isLoading.value
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Text(
-                              'Tukar Sekarang',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                          onPressed: controller.isLoading.value
+                              ? null
+                              : () async {
+                                  final success =
+                                      await controller.tukarVoucher(voucher);
+                                  if (success) {
+                                    Get.back();
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFB3CC86),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                    )),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            elevation: 2,
+                          ),
+                          child: controller.isLoading.value
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                )
+                              : const Text(
+                                  'Tukar Sekarang',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                        )),
                   ),
                 ],
               ),

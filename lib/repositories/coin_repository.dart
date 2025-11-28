@@ -13,10 +13,10 @@ class CoinRepository {
   Future<int> ambilSaldoCoin() async {
     try {
       if (_userId == null) return 0;
-      
+
       final doc = await _firestore.collection('users').doc(_userId).get();
       if (!doc.exists) return 0;
-      
+
       final data = doc.data();
       return data?['saldo_coin'] ?? 0;
     } catch (e) {
@@ -31,7 +31,7 @@ class CoinRepository {
       if (_userId == null) return false;
 
       final userRef = _firestore.collection('users').doc(_userId);
-      
+
       await _firestore.runTransaction((transaction) async {
         final snapshot = await transaction.get(userRef);
         if (!snapshot.exists) {
