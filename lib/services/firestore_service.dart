@@ -129,4 +129,7 @@ class FirestoreService {
       rethrow;
     }
   }
+  Stream<DocumentSnapshot> getDocumentStream(String path) {
+    return _database.doc(path).snapshots();
+  }
 }

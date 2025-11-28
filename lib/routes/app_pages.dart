@@ -1,7 +1,12 @@
 import 'package:get/get.dart';
+import 'package:tixcycle/bindings/admin_delete_event_binding.dart';
+import 'package:tixcycle/bindings/admin_event_binding.dart';
 import 'package:tixcycle/bindings/admin_ticket_scanner_binding.dart';
 import 'package:tixcycle/bindings/my_tickets_binding.dart';
 import 'package:tixcycle/bindings/splash_binding.dart';
+import 'package:tixcycle/bindings/ticket_detail_binding.dart';
+import 'package:tixcycle/views/admin_delete_event_page.dart';
+import 'package:tixcycle/views/admin_event_list_page.dart';
 import 'package:tixcycle/views/admin_ticket_scanner_page.dart';
 import 'package:tixcycle/views/my_tickets_page.dart';
 import 'package:tixcycle/views/splash_screen.dart';
@@ -22,16 +27,11 @@ import 'package:tixcycle/views/profile_page.dart';
 import 'package:tixcycle/bindings/edit_profile_binding.dart';
 import 'package:tixcycle/views/edit_profile_page.dart';
 import 'package:tixcycle/views/ticket_detail_page.dart';
-import 'package:tixcycle/bindings/scan_binding.dart';
-import 'package:tixcycle/views/scan_page.dart';
-import 'package:tixcycle/bindings/add_event_binding.dart';
-import 'package:tixcycle/views/add_event_page.dart';
 import 'package:tixcycle/views/admin_manage_events_page.dart';
-import 'package:tixcycle/bindings/admin_event_binding.dart';
-import 'package:tixcycle/views/admin_event_list_page.dart';
 import 'package:tixcycle/views/update_event_page.dart';
-import 'package:tixcycle/bindings/admin_delete_event_binding.dart';
-import 'package:tixcycle/views/admin_delete_event_page.dart';
+import 'package:tixcycle/views/add_event_page.dart';
+import 'package:tixcycle/bindings/add_event_binding.dart';
+import 'package:tixcycle/bindings/beranda_binding.dart';
 import 'package:tixcycle/views/admin_waste_qr_generator_page.dart';
 
 class AppPages {
@@ -43,7 +43,9 @@ class AppPages {
         page: () => const SplashScreen(),
         binding: SplashBinding()), // splash screen
     GetPage(
-        name: AppRoutes.BERANDA, page: () => const BerandaPage()), // beranda
+        name: AppRoutes.BERANDA,
+        page: () => const BerandaPage(),
+        binding: BerandaBinding()), // beranda
     GetPage(
         name: AppRoutes.LIHAT_TIKET,
         page: () => const DetailEventPage(),
@@ -80,15 +82,6 @@ class AppPages {
       binding: MyTicketsBinding(),
     ),
     GetPage(
-      name: AppRoutes.TICKET_DETAIL,
-      page: () => const TicketDetailPage(),
-    ),
-    GetPage(
-      name: AppRoutes.SCAN,
-      page: () => const ScanPage(),
-      binding: ScanBinding(),
-    ),
-    GetPage(
       name: AppRoutes.ADMIN_SCANNER,
       page: () => const AdminTicketScannerPage(),
       binding: AdminTicketScannerBinding(),
@@ -98,12 +91,18 @@ class AppPages {
       page: () => const AdminWasteQRGeneratorPage(),
     ),
     GetPage(
-        name: AppRoutes.ADD_EVENT,
-        page: () => const AddEventPage(),
-        binding: AddEventBinding()),
+      name: AppRoutes.TICKET_DETAIL,
+      page: () => const TicketDetailPage(),
+      binding: TicketDetailBinding(),
+    ),
     GetPage(
       name: AppRoutes.ADMIN_MANAGE_EVENTS,
       page: () => const AdminManageEventsPage(),
+    ),
+    GetPage(
+      name: AppRoutes.ADD_EVENT,
+      page: () => const AddEventPage(),
+      binding: AddEventBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_EVENT_LIST,

@@ -22,6 +22,21 @@ class PurchasedTicketModel {
     this.checkInTime,
   });
 
+  factory PurchasedTicketModel.fromSnapshot(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return PurchasedTicketModel(
+      id: doc.id,
+      transactionId: data['transactionId'] ?? '',
+      eventId: data['eventId'] ?? '',
+      userId: data['userId'] ?? '',
+      categoryName: data['categoryName'] ?? '',
+      price: (data['price'] as num?)?.toDouble() ?? 0.0,
+      seatNumber: data['seatNumber'] ?? '',
+      isCheckedIn: data['isCheckedIn'] ?? false,
+      checkInTime: data['checkInTime'] as Timestamp?,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'transactionId': transactionId,
