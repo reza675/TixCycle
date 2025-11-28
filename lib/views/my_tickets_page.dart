@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tixcycle/controllers/my_tickets_controller.dart';
+import 'package:tixcycle/controllers/user_account_controller.dart';
 import 'package:tixcycle/models/transaction_model.dart';
 import 'package:tixcycle/models/event_model.dart';
 import 'package:tixcycle/routes/app_routes.dart';
@@ -15,7 +16,6 @@ class MyTicketsPage extends StatefulWidget {
 }
 
 class _MyTicketsPageState extends State<MyTicketsPage> {
-
   MyTicketsController controller = Get.find<MyTicketsController>();
   int currentIndex = 1;
   String selectedFilter = 'Semua';
@@ -33,7 +33,12 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
         currentIndex = index;
       });
     } else if (index == 2) {
-      Get.snackbar("Info", "Fitur Scan belum diimplementasikan.");
+      final userAccountController = Get.find<UserAccountController>();
+      if (userAccountController.isAdmin) {
+        Get.toNamed(AppRoutes.ADMIN_SCANNER);
+      } else {
+        Get.toNamed(AppRoutes.SCAN);
+      }
     } else if (index == 4) {
       Get.offAllNamed(AppRoutes.PROFILE);
     } else {
@@ -221,7 +226,6 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
       }).toList();
     }
 
-    
     if (filteredTransactions.isEmpty && selectedFilter != 'Semua') {
       return Center(
         child: Column(

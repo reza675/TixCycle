@@ -36,6 +36,12 @@ class _ProfilePageState extends State<ProfilePage> {
       Get.offAllNamed(AppRoutes.BERANDA);
     } else if (index == 1) {
       Get.offAllNamed(AppRoutes.MY_TICKETS);
+    } else if (index == 2) {
+      if (userAccountController.isAdmin) {
+        Get.toNamed(AppRoutes.ADMIN_SCANNER);
+      } else {
+        Get.toNamed(AppRoutes.SCAN);
+      }
     } else if (index == 3) {
       Get.snackbar("Info", "Halaman Koin belum diimplementasikan.");
     } else if (index == 4) {
@@ -221,8 +227,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildAdminButton(
                     text: "Kelola Data Tiket",
                     onPressed: () {
-                      Get.snackbar("Info",
-                          "Halaman Kelola Data Tiket (Admin) belum ada.");
+                      Get.toNamed(AppRoutes.ADMIN_MANAGE_EVENTS);
                     }),
                 const SizedBox(height: 16),
                 _buildAdminButton(
