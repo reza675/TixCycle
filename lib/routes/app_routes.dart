@@ -18,4 +18,8 @@ abstract class AppRoutes {
   static const ADMIN_EVENT_LIST = '/admin/event-list';
   static const UPDATE_EVENT = '/admin/update-event';
   static const ADMIN_DELETE_EVENT_LIST = '/admin/delete-event-list';
+  static const KOIN = '/koin';
+  static const DETAIL_VOUCHER = '/detail-voucher';
+  static const MY_VOUCHERS = '/my-vouchers';
+  static const MY_VOUCHER_DETAIL = '/my-voucher-detail';
 }
