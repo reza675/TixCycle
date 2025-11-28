@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tixcycle/models/ticket_model.dart';
 import 'package:tixcycle/services/firestore_service.dart';
@@ -191,16 +190,35 @@ class EventRepository {
     try {
       final eventRef = _db.collection(_collectionPath).doc(eventId);
 
-      final ticketsSnapshot = await eventRef.collection('tickets').get();
-      for (var doc in ticketsSnapshot.docs) {
+      final ticketTypesSnapshot = await eventRef.collection('tickets').get();
+      for (var doc in ticketTypesSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      final purchasedTicketsSnapshot = await _db
+          .collection('purchased_tickets')
+          .where('eventId', isEqualTo: eventId)
+          .get();
+
+      for (var doc in purchasedTicketsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      final transactionsSnapshot = await _db
+          .collection('transactions')
+          .where('eventId', isEqualTo: eventId)
+          .get();
+
+      for (var doc in transactionsSnapshot.docs) {
         batch.delete(doc.reference);
       }
 
       batch.delete(eventRef);
 
       await batch.commit();
+      
     } catch (e) {
-      print("Error deleting event: $e");
+      print("Error deleting event and history: $e");
       rethrow;
     }
   }
