@@ -40,6 +40,8 @@ import 'package:tixcycle/views/detail_voucher_page.dart';
 import 'package:tixcycle/views/my_vouchers_page.dart';
 import 'package:tixcycle/views/my_voucher_detail_page.dart';
 import 'package:tixcycle/views/admin_waste_qr_generator_page.dart';
+import 'package:tixcycle/views/scan_page.dart';
+import 'package:tixcycle/bindings/scan_binding.dart';
 
 class AppPages {
   // rute/halaman pertama (nanti diganti splash)
@@ -87,6 +89,11 @@ class AppPages {
       name: AppRoutes.MY_TICKETS,
       page: () => const MyTicketsPage(),
       binding: MyTicketsBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SCAN,
+      page: () => const ScanPage(),
+      binding: ScanBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_SCANNER,
