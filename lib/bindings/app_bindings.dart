@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:tixcycle/controllers/admin_voucher_controller.dart';
 import 'package:tixcycle/controllers/location_controller.dart';
 import 'package:tixcycle/controllers/user_account_controller.dart';
 import 'package:tixcycle/repositories/auth_repository.dart';
@@ -50,5 +51,9 @@ class AppBindings extends Bindings {
     Get.put<LocationController>(LocationController(Get.find()),
         permanent: true);
     Get.put<BerandaController>(BerandaController(Get.find()), permanent: true);
+    Get.put<AdminVoucherController>(
+      AdminVoucherController(Get.find()),
+      permanent: true,
+    );
   }
 }
