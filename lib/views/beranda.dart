@@ -51,7 +51,7 @@ class _BerandaPageState extends State<BerandaPage> {
         Get.toNamed(AppRoutes.SCAN);
       }
     } else if (index == 3) {
-      Get.snackbar("Info", "Halaman Koin belum diimplementasikan.");
+      Get.toNamed(AppRoutes.KOIN);
     } else if (index == 4) {
       Get.toNamed(AppRoutes.PROFILE);
     } else {

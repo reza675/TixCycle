@@ -39,6 +39,8 @@ class _MyTicketsPageState extends State<MyTicketsPage> {
       } else {
         Get.toNamed(AppRoutes.SCAN);
       }
+    } else if (index == 3) {
+      Get.toNamed(AppRoutes.KOIN);
     } else if (index == 4) {
       Get.offAllNamed(AppRoutes.PROFILE);
     } else {

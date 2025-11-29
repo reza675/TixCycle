@@ -32,6 +32,13 @@ import 'package:tixcycle/views/update_event_page.dart';
 import 'package:tixcycle/views/add_event_page.dart';
 import 'package:tixcycle/bindings/add_event_binding.dart';
 import 'package:tixcycle/bindings/beranda_binding.dart';
+import 'package:tixcycle/bindings/koin_binding.dart';
+import 'package:tixcycle/bindings/detail_voucher_binding.dart';
+import 'package:tixcycle/bindings/my_vouchers_binding.dart';
+import 'package:tixcycle/views/koin_page.dart';
+import 'package:tixcycle/views/detail_voucher_page.dart';
+import 'package:tixcycle/views/my_vouchers_page.dart';
+import 'package:tixcycle/views/my_voucher_detail_page.dart';
 import 'package:tixcycle/views/admin_waste_qr_generator_page.dart';
 
 class AppPages {
@@ -118,6 +125,26 @@ class AppPages {
       name: AppRoutes.ADMIN_DELETE_EVENT_LIST,
       page: () => const AdminDeleteEventPage(),
       binding: AdminDeleteEventBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.KOIN,
+      page: () => const KoinPage(),
+      binding: KoinBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.DETAIL_VOUCHER,
+      page: () => const DetailVoucherPage(),
+      binding: DetailVoucherBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.MY_VOUCHERS,
+      page: () => const MyVouchersPage(),
+      binding: MyVouchersBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.MY_VOUCHER_DETAIL,
+      page: () => const MyVoucherDetailPage(),
+      binding: MyVouchersBinding(),
     ),
   ];
 }

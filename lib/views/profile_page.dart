@@ -43,7 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
         Get.toNamed(AppRoutes.SCAN);
       }
     } else if (index == 3) {
-      Get.snackbar("Info", "Halaman Koin belum diimplementasikan.");
+      Get.toNamed(AppRoutes.KOIN);
     } else if (index == 4) {
       setState(() {
         currentIndex = index;
@@ -173,6 +173,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     _buildPersonalInfoItem(
                         "Pekerjaan", user.occupation ?? "Belum diatur"),
                   ],
+                ),
+                const SizedBox(height: 24),
+                _buildMenuButton(
+                  icon: Icons.card_giftcard,
+                  text: "Voucher Saya",
+                  onPressed: () => Get.toNamed(AppRoutes.MY_VOUCHERS),
                 ),
                 const SizedBox(height: 32),
                 _buildLogoutButton(controller),
@@ -453,6 +459,68 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Text(
           text,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuButton({
+    required IconData icon,
+    required String text,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: c1_cream,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: c3_medGreen.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: c4_darkGreen,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: c4_darkGreen,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: c4_darkGreen,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
