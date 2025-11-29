@@ -5,6 +5,7 @@ import 'package:tixcycle/bindings/admin_ticket_scanner_binding.dart';
 import 'package:tixcycle/bindings/my_tickets_binding.dart';
 import 'package:tixcycle/bindings/splash_binding.dart';
 import 'package:tixcycle/bindings/ticket_detail_binding.dart';
+import 'package:tixcycle/bindings/scan_binding.dart';
 import 'package:tixcycle/views/admin_delete_event_page.dart';
 import 'package:tixcycle/views/admin_event_list_page.dart';
 import 'package:tixcycle/views/admin_ticket_scanner_page.dart';
@@ -39,6 +40,7 @@ import 'package:tixcycle/views/koin_page.dart';
 import 'package:tixcycle/views/detail_voucher_page.dart';
 import 'package:tixcycle/views/my_vouchers_page.dart';
 import 'package:tixcycle/views/my_voucher_detail_page.dart';
+import 'package:tixcycle/views/scan_page.dart';
 
 class AppPages {
   // rute/halaman pertama (nanti diganti splash)
@@ -96,6 +98,11 @@ class AppPages {
       name: AppRoutes.TICKET_DETAIL,
       page: () => const TicketDetailPage(),
       binding: TicketDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SCAN,
+      page: () => const ScanPage(),
+      binding: ScanBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_MANAGE_EVENTS,
