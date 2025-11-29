@@ -229,4 +229,123 @@ class VoucherRepository {
             .map((doc) => VoucherModel.fromSnapshot(doc))
             .toList());
   }
+
+  // validasi merchant voucher QR code
+  Future<Map<String, dynamic>> validateVoucherQRCode(String qrCode) async {
+    try {
+      print("🔍 Starting validation for QR: $qrCode");
+
+      // Query user voucher by QR code across all users
+      final querySnapshot = await _firestore
+          .collectionGroup('my_vouchers')
+          .where('qr_code', isEqualTo: qrCode)
+          .limit(1)
+          .get();
+
+      print("📊 Query result: ${querySnapshot.docs.length} documents found");
+
+      if (querySnapshot.docs.isEmpty) {
+        print("❌ QR Code tidak ditemukan di database");
+        return {
+          'valid': false,
+          'message': 'QR Code tidak ditemukan',
+        };
+      }
+
+      final doc = querySnapshot.docs.first;
+      final data = doc.data();
+
+      print("✅ Document found:");
+      print("   - Doc ID: ${doc.id}");
+      print("   - User ID: ${doc.reference.parent.parent!.id}");
+      print("   - Voucher Name: ${data['voucher_name']}");
+      print("   - Used: ${data['used']}");
+      print("   - Valid Until: ${data['valid_until']}");
+
+      // Check if already used
+      final bool isUsed = data['used'] ?? false;
+      if (isUsed) {
+        final usedAt = (data['used_at'] as Timestamp?)?.toDate();
+        print("❌ Voucher sudah digunakan pada: $usedAt");
+        return {
+          'valid': false,
+          'message': 'Voucher sudah digunakan',
+          'usedAt': usedAt,
+        };
+      }
+
+      // Check if expired
+      final validUntil = (data['valid_until'] as Timestamp).toDate();
+      if (DateTime.now().isAfter(validUntil)) {
+        print("❌ Voucher kadaluwarsa: $validUntil");
+        return {
+          'valid': false,
+          'message': 'Voucher sudah kadaluwarsa',
+          'validUntil': validUntil,
+        };
+      }
+
+      // Valid voucher
+      print("✅ Voucher VALID!");
+      return {
+        'valid': true,
+        'message': 'Voucher valid dan dapat digunakan',
+        'voucherData': {
+          'id': doc.id,
+          'userId': doc.reference.parent.parent!.id,
+          'voucherName': data['voucher_name'],
+          'merchantName': data['merchant_name'],
+          'discountAmount': data['discount_amount'],
+          'validUntil': validUntil,
+          'purchasedAt': (data['purchased_at'] as Timestamp).toDate(),
+        },
+      };
+    } catch (e) {
+      print("❌ Error validating voucher QR code: $e");
+      print("   Stack trace: ${StackTrace.current}");
+      return {
+        'valid': false,
+        'message': 'Terjadi kesalahan saat memvalidasi voucher',
+        'error': e.toString(),
+      };
+    }
+  }
+
+  // Redeem/gunakan voucher (update status menjadi used)
+  Future<bool> redeemVoucher(String userId, String voucherDocId) async {
+    try {
+      final docRef = _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('my_vouchers')
+          .doc(voucherDocId);
+
+      await _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(docRef);
+
+        if (!snapshot.exists) {
+          throw Exception("Voucher tidak ditemukan");
+        }
+
+        final data = snapshot.data();
+        final bool isUsed = data?['used'] ?? false;
+
+        if (isUsed) {
+          throw Exception("Voucher sudah digunakan");
+        }
+
+        // Update voucher status
+        transaction.update(docRef, {
+          'used': true,
+          'used_at': FieldValue.serverTimestamp(),
+        });
+      });
+
+      print('✅ Voucher berhasil di-redeem: $voucherDocId');
+      return true;
+    } catch (e) {
+      print('❌ Error redeem voucher: $e');
+      return false;
+    }
+  }
 }

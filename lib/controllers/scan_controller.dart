@@ -30,8 +30,9 @@ class ScanController extends GetxController {
     cameraController = MobileScannerController(
       facing: CameraFacing.back,
       torchEnabled: false,
-      detectionSpeed: DetectionSpeed.normal,
+      detectionSpeed: DetectionSpeed.noDuplicates, // Prevent duplicate scans
       autoStart: false, // Manual start untuk lifecycle management
+      returnImage: false, // Don't return images to reduce memory usage
     );
 
     // Start listening to barcode events

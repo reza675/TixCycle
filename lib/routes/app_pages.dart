@@ -43,6 +43,8 @@ import 'package:tixcycle/views/my_voucher_detail_page.dart';
 import 'package:tixcycle/views/admin_waste_qr_generator_page.dart';
 import 'package:tixcycle/views/scan_page.dart';
 import 'package:tixcycle/bindings/scan_binding.dart';
+import 'package:tixcycle/views/merchant_voucher_scanner_page.dart';
+import 'package:tixcycle/bindings/merchant_voucher_scanner_binding.dart';
 
 class AppPages {
   // rute/halaman pertama (nanti diganti splash)
@@ -100,6 +102,11 @@ class AppPages {
       name: AppRoutes.ADMIN_SCANNER,
       page: () => const AdminTicketScannerPage(),
       binding: AdminTicketScannerBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.MERCHANT_VOUCHER_SCANNER,
+      page: () => const MerchantVoucherScannerPage(),
+      binding: MerchantVoucherScannerBinding(),
     ),
     GetPage(
       name: AppRoutes.ADMIN_WASTE_QR,

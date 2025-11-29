@@ -13,6 +13,7 @@ abstract class AppRoutes {
   static const TICKET_DETAIL = '/ticket-detail';
   static const SCAN = '/scan';
   static const ADMIN_SCANNER = '/adminticketscanner';
+  static const MERCHANT_VOUCHER_SCANNER = '/merchant/voucher-scanner';
   static const ADMIN_WASTE_QR = '/admin/waste-qr-generator';
   static const ADD_EVENT = '/admin/add-event';
   static const ADMIN_MANAGE_EVENTS = '/admin/manage-events';

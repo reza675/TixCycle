@@ -237,6 +237,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     }),
                 const SizedBox(height: 16),
                 _buildAdminButton(
+                    text: "Scan Voucher Pelanggan",
+                    icon: Icons.qr_code_scanner,
+                    onPressed: () {
+                      Get.toNamed(AppRoutes.MERCHANT_VOUCHER_SCANNER);
+                    }),
+                const SizedBox(height: 16),
+                _buildAdminButton(
                     text: "QR Code Sampah",
                     onPressed: () {
                       Get.toNamed(AppRoutes.ADMIN_WASTE_QR);
@@ -442,8 +449,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildAdminButton(
-      {required String text, required VoidCallback onPressed}) {
+  Widget _buildAdminButton({
+    required String text,
+    required VoidCallback onPressed,
+    IconData? icon,
+  }) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -456,9 +466,18 @@ class _ProfilePageState extends State<ProfilePage> {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 20),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              text,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
     );
