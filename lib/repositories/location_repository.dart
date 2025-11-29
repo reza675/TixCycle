@@ -42,4 +42,8 @@ class LocationRepository {
       rethrow;
     }
   }
+
+  Future<Position?> getCoordinatesFromAddress(String address) async {
+    return await _locationService.getCoordinatesFromAddress(address);
+  }
 }

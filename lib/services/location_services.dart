@@ -59,4 +59,31 @@ class LocationServices {
     return "Gagal mendapatkan lokasi";
   }
 }
+
+  Future<Position?> getCoordinatesFromAddress(String address) async {
+    try {
+      
+      List<Location> locations = await locationFromAddress(address);
+      
+      if (locations.isNotEmpty) {
+        final loc = locations.first;
+        return Position(
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          timestamp: DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0, 
+          altitudeAccuracy: 0, 
+          headingAccuracy: 0
+        );
+      }
+      return null;
+    } catch (e) {
+      print("Error geocoding address: $e");
+      return null;
+    }
+  }
 }

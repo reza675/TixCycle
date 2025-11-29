@@ -5,7 +5,7 @@ class AddEventBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<AddEventController>(
-      () => AddEventController(Get.find(), Get.find()),
+      () => AddEventController(Get.find(), Get.find(),Get.find(),),
     );
   }
 }
