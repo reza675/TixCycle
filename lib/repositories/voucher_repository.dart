@@ -2,10 +2,14 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tixcycle/models/voucher_model.dart';
+import 'package:tixcycle/services/supabase_storage_service.dart';
 
 class VoucherRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final SupabaseStorageService _supabaseStorage;
+  
+  VoucherRepository(this._supabaseStorage);
 
   CollectionReference get _vouchersCollection =>
       _firestore.collection('vouchers');
@@ -14,8 +18,7 @@ class VoucherRepository {
   Stream<List<VoucherModel>> ambilSemuaVoucher() {
     return _vouchersCollection
         .where('stock', isGreaterThan: 0)
-        .orderBy('stock')
-        .orderBy('price_coins')
+        .orderBy('created_at', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => VoucherModel.fromSnapshot(doc))
@@ -25,15 +28,21 @@ class VoucherRepository {
   // Get all vouchers (untuk KoinController)
   Future<List<VoucherModel>> getAllVouchers() async {
     try {
+      print("=== FETCHING ALL VOUCHERS FROM FIRESTORE ===");
       final snapshot = await _vouchersCollection
-          .where('stock', isGreaterThan: 0)
-          .orderBy('stock')
-          .orderBy('price_coins')
+          .orderBy('created_at', descending: true)
           .get();
 
-      return snapshot.docs
-          .map((doc) => VoucherModel.fromSnapshot(doc))
+      print("=== FOUND ${snapshot.docs.length} DOCUMENTS ===");
+      final vouchers = snapshot.docs
+          .map((doc) {
+            final data = doc.data() as Map<String, dynamic>?;
+            print("Voucher ID: ${doc.id}, Name: ${data?['name']}");
+            return VoucherModel.fromSnapshot(doc);
+          })
           .toList();
+      
+      return vouchers;
     } catch (e) {
       print("Error getAllVouchers: $e");
       return [];
@@ -98,28 +107,38 @@ class VoucherRepository {
   }
 
   // Upload gambar voucher ke Firebase Storage
+  /// Upload voucher image to Supabase Storage
+  /// Returns the public URL of the uploaded image
   Future<String?> uploadVoucherImage(File imageFile, String voucherId) async {
     try {
-      final fileName =
-          'vouchers/${voucherId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref = _storage.ref().child(fileName);
+      print("=== UPLOAD IMAGE TO SUPABASE START ===");
+      print("Image path: ${imageFile.path}");
+      print("Voucher ID: $voucherId");
+      
+      // Upload to Supabase Storage
+      final imageUrl = await _supabaseStorage.uploadVoucherImage(
+        imageFile: imageFile,
+        voucherId: voucherId,
+      );
 
-      await ref.putFile(imageFile);
-      final downloadUrl = await ref.getDownloadURL();
+      if (imageUrl != null) {
+        print("=== UPLOAD SUCCESS: $imageUrl ===");
+      } else {
+        print("=== UPLOAD FAILED ===");
+      }
 
-      return downloadUrl;
+      return imageUrl;
     } catch (e) {
       print("Error upload gambar voucher: $e");
       return null;
     }
   }
 
-  // Hapus gambar voucher dari Firebase Storage
+  // Hapus gambar voucher dari Supabase Storage
   Future<void> deleteVoucherImage(String imageUrl) async {
     try {
-      if (imageUrl.isNotEmpty && imageUrl.contains('firebase')) {
-        final ref = _storage.refFromURL(imageUrl);
-        await ref.delete();
+      if (imageUrl.isNotEmpty && imageUrl.contains('supabase')) {
+        await _supabaseStorage.deleteVoucherImage(imageUrl);
       }
     } catch (e) {
       print("Error hapus gambar voucher: $e");

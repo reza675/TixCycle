@@ -18,7 +18,7 @@ class CoinRepository {
       if (!doc.exists) return 0;
 
       final data = doc.data();
-      return data?['saldo_coin'] ?? 0;
+      return data?['coins'] ?? 0;
     } catch (e) {
       print("Error ambil saldo coin: $e");
       return 0;
@@ -38,14 +38,14 @@ class CoinRepository {
           throw Exception("User tidak ditemukan");
         }
 
-        final currentSaldo = snapshot.data()?['saldo_coin'] ?? 0;
+        final currentSaldo = snapshot.data()?['coins'] ?? 0;
         final newSaldo = currentSaldo + amount;
 
         if (newSaldo < 0) {
           throw Exception("Saldo tidak cukup");
         }
 
-        transaction.update(userRef, {'saldo_coin': newSaldo});
+        transaction.update(userRef, {'coins': newSaldo});
       });
 
       return true;

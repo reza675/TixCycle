@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tixcycle/controllers/koin_controller.dart';
 import 'package:tixcycle/models/voucher_model.dart';
 import 'package:tixcycle/repositories/voucher_repository.dart';
 
@@ -93,28 +94,46 @@ class AdminVoucherController extends GetxController {
   }
 
   Future<void> simpanVoucher() async {
-    if (!_validateForm()) return;
+    print("=== SIMPAN VOUCHER STARTED ===");
+    print("Name: ${nameC.text}");
+    print("Price: ${priceCoinsC.text}");
+    print("Stock: ${stockC.text}");
+    print("Is Edit Mode: ${isEditMode.value}");
+    
+    if (!_validateForm()) {
+      print("=== VALIDATION FAILED ===");
+      return;
+    }
 
     try {
       isLoading(true);
 
       String imageUrl = existingImageUrl.value;
+      print("=== Existing Image URL: $imageUrl ===");
+      print("=== Selected Image: ${selectedImage.value?.path} ===");
 
       // Upload image jika ada image baru
       if (selectedImage.value != null) {
+        print("=== UPLOADING IMAGE TO FIREBASE STORAGE ===");
         final tempId = DateTime.now().millisecondsSinceEpoch.toString();
         final uploadedUrl = await repository.uploadVoucherImage(
           selectedImage.value!,
           isEditMode.value ? editingVoucherId.value : tempId,
         );
 
+        print("=== UPLOAD RESULT: $uploadedUrl ===");
         if (uploadedUrl != null) {
           imageUrl = uploadedUrl;
+          print("=== IMAGE URL SET: $imageUrl ===");
           // Hapus image lama jika edit mode
           if (isEditMode.value && existingImageUrl.value.isNotEmpty) {
             await repository.deleteVoucherImage(existingImageUrl.value);
           }
+        } else {
+          print("=== IMAGE UPLOAD FAILED ===");
         }
+      } else {
+        print("=== NO IMAGE SELECTED ===");
       }
 
       final voucher = VoucherModel(
@@ -135,15 +154,30 @@ class AdminVoucherController extends GetxController {
       if (isEditMode.value) {
         await repository.updateVoucher(
             editingVoucherId.value, voucher.toJson());
+        print("=== VOUCHER UPDATED ===");
         Get.snackbar('Berhasil', 'Voucher berhasil diperbarui');
       } else {
         await repository.createVoucher(voucher);
+        print("=== VOUCHER CREATED ===");
         Get.snackbar('Berhasil', 'Voucher berhasil ditambahkan');
       }
 
+      // Refresh KoinController untuk update voucher list
+      try {
+        print("=== REFRESHING KOIN CONTROLLER ===");
+        final koinController = Get.find<KoinController>();
+        await koinController.loadVouchers();
+        print("=== KOIN CONTROLLER REFRESHED, voucher count: ${koinController.voucherList.length} ===");
+      } catch (e) {
+        print("KoinController not found or error refreshing: $e");
+      }
+
+      print("=== CLOSING MODAL ===");
       Get.back();
       resetForm();
+      print("=== SIMPAN VOUCHER COMPLETED ===");
     } catch (e) {
+      print("=== ERROR SAVING VOUCHER: $e ===");
       Get.snackbar('Error', 'Gagal menyimpan voucher: $e');
     } finally {
       isLoading(false);
@@ -172,6 +206,14 @@ class AdminVoucherController extends GetxController {
       if (confirm == true) {
         await repository.deleteVoucher(voucher.id);
         Get.snackbar('Berhasil', 'Voucher berhasil dihapus');
+        
+        // Refresh KoinController untuk update voucher list
+        try {
+          final koinController = Get.find<KoinController>();
+          await koinController.loadVouchers();
+        } catch (e) {
+          print("KoinController not found or error refreshing: $e");
+        }
       }
     } catch (e) {
       Get.snackbar('Error', 'Gagal menghapus voucher: $e');

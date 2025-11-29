@@ -6,9 +6,47 @@ import 'package:tixcycle/controllers/user_account_controller.dart';
 import 'package:tixcycle/models/voucher_model.dart';
 import 'package:tixcycle/routes/app_routes.dart';
 import 'package:tixcycle/views/widgets/admin_voucher_modal.dart';
+import 'package:tixcycle/views/widgets/bottom_bar.dart';
 
-class KoinPage extends StatelessWidget {
+class KoinPage extends StatefulWidget {
   const KoinPage({super.key});
+
+  @override
+  State<KoinPage> createState() => _KoinPageState();
+}
+
+class _KoinPageState extends State<KoinPage> {
+  int currentIndex = 3; // Index untuk Koin di bottom navbar
+
+  void _handleNavigation(int index) {
+    final userAccountController = Get.find<UserAccountController>();
+    final bool isLoggedIn = userAccountController.firebaseUser.value != null;
+
+    final halamanIndeks = [1, 2, 3, 4];
+    if (halamanIndeks.contains(index) && !isLoggedIn) {
+      Get.toNamed(AppRoutes.LOGIN);
+      return;
+    }
+
+    if (index == 0) {
+      Get.offAllNamed(AppRoutes.BERANDA);
+    } else if (index == 1) {
+      Get.toNamed(AppRoutes.MY_TICKETS);
+    } else if (index == 2) {
+      if (userAccountController.isAdmin) {
+        Get.toNamed(AppRoutes.ADMIN_SCANNER);
+      } else {
+        Get.toNamed(AppRoutes.SCAN);
+      }
+    } else if (index == 3) {
+      // Already on Koin page
+      setState(() {
+        currentIndex = index;
+      });
+    } else if (index == 4) {
+      Get.toNamed(AppRoutes.PROFILE);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,79 +55,87 @@ class KoinPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E2),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFFF8E2),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF3F5135)),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Tukar Koin',
-          style: TextStyle(
-            color: Color(0xFF3F5135),
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: false,
-        actions: [
-          Obx(() {
-            if (userController.isAdmin) {
-              return IconButton(
-                icon: const Icon(Icons.add_circle,
-                    color: Color(0xFF4CAF50), size: 28),
-                onPressed: () {
-                  Get.dialog(const AdminVoucherModal());
-                },
-                tooltip: 'Tambah Voucher',
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSaldoKoinCard(controller),
-              const SizedBox(height: 24),
-              const Text(
-                'Voucher Saya',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF3F5135),
+      extendBody: true,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header dengan tombol admin
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Tukar Koin',
+                      style: TextStyle(
+                        color: Color(0xFF3F5135),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                    Obx(() {
+                      if (userController.isAdmin) {
+                        return IconButton(
+                          icon: const Icon(Icons.add_circle,
+                              color: Color(0xFF4CAF50), size: 32),
+                          onPressed: () {
+                            Get.dialog(const AdminVoucherModal());
+                          },
+                          tooltip: 'Tambah Voucher',
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+                const SizedBox(height: 20),
+                _buildSaldoKoinCard(controller),
+                const SizedBox(height: 24),
+                const Text(
+                  'Voucher Tersedia',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3F5135),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (controller.voucherList.isEmpty) {
-                  return _buildEmptyState();
-                }
+                  if (controller.voucherList.isEmpty) {
+                    return _buildEmptyState();
+                  }
 
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.voucherList.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final voucher = controller.voucherList[index];
-                    return _buildVoucherCard(
-                        context, voucher, controller, userController);
-                  },
-                );
-              }),
-            ],
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.voucherList.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final voucher = controller.voucherList[index];
+                      return _buildVoucherCard(
+                          context, voucher, controller, userController);
+                    },
+                  );
+                }),
+                const SizedBox(height: 100), // Space for bottom navbar
+              ],
+            ),
           ),
         ),
+      ),
+      bottomNavigationBar: CurvedBottomBar(
+        currentIndex: currentIndex,
+        onTap: (i) => _handleNavigation(i),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: CenterActionButton(
+        onPressed: () => _handleNavigation(2),
       ),
     );
   }

@@ -561,14 +561,19 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
   }
 
   Future<void> _simpanVoucher(bool isEdit) async {
-    if (!formKey.currentState!.validate()) return;
+    print("=== MODAL: SIMPAN BUTTON CLICKED ===");
+    if (!formKey.currentState!.validate()) {
+      print("=== MODAL: FORM VALIDATION FAILED ===");
+      return;
+    }
 
     final tataCara = tataCaraControllers
         .map((ctrl) => ctrl.text.trim())
         .where((text) => text.isNotEmpty)
         .toList();
 
-    // Set controller properties
+    print("=== MODAL: SETTING CONTROLLER DATA ===");
+    // Set controller properties dengan data dari form
     controller.nameC.text = nameController.text.trim();
     controller.descriptionC.text = descController.text.trim();
     controller.priceCoinsC.text = priceController.text.trim();
@@ -577,16 +582,29 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
     controller.merchantNameC.text = merchantController.text.trim();
     controller.categoryC.text = selectedCategory;
     controller.validUntil.value = validUntil;
+    
+    // Set tata cara
     controller.tataCara.clear();
     for (var step in tataCara) {
       controller.tataCara.add(TextEditingController(text: step));
     }
 
+    // Set mode edit dan existing image jika edit mode
     if (isEdit) {
-      controller.loadVoucherForEdit(widget.voucherToEdit!);
+      controller.isEditMode.value = true;
+      controller.editingVoucherId.value = widget.voucherToEdit!.id;
+      controller.existingImageUrl.value = widget.voucherToEdit!.imageUrl;
+      print("=== MODAL: EDIT MODE ===");
+    } else {
+      controller.isEditMode.value = false;
+      controller.editingVoucherId.value = '';
+      print("=== MODAL: CREATE MODE ===");
     }
 
+    print("=== MODAL: CALLING CONTROLLER.SIMPANVOUCHER() ===");
+    // Panggil simpanVoucher dari controller
     await controller.simpanVoucher();
+    print("=== MODAL: CONTROLLER.SIMPANVOUCHER() COMPLETED ===");
   }
 
   String _formatDate(DateTime date) {
