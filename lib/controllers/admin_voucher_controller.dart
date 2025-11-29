@@ -99,7 +99,7 @@ class AdminVoucherController extends GetxController {
     print("Price: ${priceCoinsC.text}");
     print("Stock: ${stockC.text}");
     print("Is Edit Mode: ${isEditMode.value}");
-    
+
     if (!_validateForm()) {
       print("=== VALIDATION FAILED ===");
       return;
@@ -167,7 +167,8 @@ class AdminVoucherController extends GetxController {
         print("=== REFRESHING KOIN CONTROLLER ===");
         final koinController = Get.find<KoinController>();
         await koinController.loadVouchers();
-        print("=== KOIN CONTROLLER REFRESHED, voucher count: ${koinController.voucherList.length} ===");
+        print(
+            "=== KOIN CONTROLLER REFRESHED, voucher count: ${koinController.voucherList.length} ===");
       } catch (e) {
         print("KoinController not found or error refreshing: $e");
       }
@@ -206,7 +207,7 @@ class AdminVoucherController extends GetxController {
       if (confirm == true) {
         await repository.deleteVoucher(voucher.id);
         Get.snackbar('Berhasil', 'Voucher berhasil dihapus');
-        
+
         // Refresh KoinController untuk update voucher list
         try {
           final koinController = Get.find<KoinController>();

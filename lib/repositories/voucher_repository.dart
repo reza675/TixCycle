@@ -8,7 +8,7 @@ class VoucherRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final SupabaseStorageService _supabaseStorage;
-  
+
   VoucherRepository(this._supabaseStorage);
 
   CollectionReference get _vouchersCollection =>
@@ -34,14 +34,12 @@ class VoucherRepository {
           .get();
 
       print("=== FOUND ${snapshot.docs.length} DOCUMENTS ===");
-      final vouchers = snapshot.docs
-          .map((doc) {
-            final data = doc.data() as Map<String, dynamic>?;
-            print("Voucher ID: ${doc.id}, Name: ${data?['name']}");
-            return VoucherModel.fromSnapshot(doc);
-          })
-          .toList();
-      
+      final vouchers = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>?;
+        print("Voucher ID: ${doc.id}, Name: ${data?['name']}");
+        return VoucherModel.fromSnapshot(doc);
+      }).toList();
+
       return vouchers;
     } catch (e) {
       print("Error getAllVouchers: $e");
@@ -114,7 +112,7 @@ class VoucherRepository {
       print("=== UPLOAD IMAGE TO SUPABASE START ===");
       print("Image path: ${imageFile.path}");
       print("Voucher ID: $voucherId");
-      
+
       // Upload to Supabase Storage
       final imageUrl = await _supabaseStorage.uploadVoucherImage(
         imageFile: imageFile,

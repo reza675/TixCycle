@@ -10,7 +10,7 @@ class SupabaseStorageService extends GetxService {
 
   Future<String> uploadProfileImage(File imageFile, String userId) async {
     try {
-      // 1. path file di Supabase. 
+      // 1. path file di Supabase.
       final String path = '$userId.jpg';
 
       // 2. Upload file
@@ -19,19 +19,18 @@ class SupabaseStorageService extends GetxService {
             imageFile,
             fileOptions: const FileOptions(
               cacheControl: '3600',
-              upsert: true, 
+              upsert: true,
             ),
           );
 
       // 3. Dapatkan URL publik dari file yang baru di-upload
-      final String publicUrl = _client.storage
-          .from(_profileBucketName)
-          .getPublicUrl(path);
+      final String publicUrl =
+          _client.storage.from(_profileBucketName).getPublicUrl(path);
 
-      final String cacheBustedUrl = '$publicUrl?t=${DateTime.now().millisecondsSinceEpoch}';
+      final String cacheBustedUrl =
+          '$publicUrl?t=${DateTime.now().millisecondsSinceEpoch}';
 
-      return cacheBustedUrl;  
-          
+      return cacheBustedUrl;
     } catch (e) {
       print("Error uploading to Supabase: $e");
       rethrow;
@@ -61,31 +60,29 @@ class SupabaseStorageService extends GetxService {
       // Generate unique filename
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = '${voucherId}_$timestamp.jpg';
-      
+
       print("Uploading to: $_voucherBucketName/$fileName");
 
       // Upload to Supabase Storage bucket 'foto vouchers'
-      final uploadResponse = await _client.storage
-          .from(_voucherBucketName)
-          .upload(
-            fileName,
-            imageFile,
-            fileOptions: const FileOptions(
-              cacheControl: '3600',
-              upsert: false,
-            ),
-          );
+      final uploadResponse =
+          await _client.storage.from(_voucherBucketName).upload(
+                fileName,
+                imageFile,
+                fileOptions: const FileOptions(
+                  cacheControl: '3600',
+                  upsert: false,
+                ),
+              );
 
       print("Upload response: $uploadResponse");
       print("Upload successful!");
 
       // Get public URL with cache buster
-      final publicUrl = _client.storage
-          .from(_voucherBucketName)
-          .getPublicUrl(fileName);
+      final publicUrl =
+          _client.storage.from(_voucherBucketName).getPublicUrl(fileName);
 
       final cacheBustedUrl = '$publicUrl?t=$timestamp';
-      
+
       print("Public URL: $cacheBustedUrl");
       return cacheBustedUrl;
     } catch (e, stackTrace) {
@@ -109,9 +106,7 @@ class SupabaseStorageService extends GetxService {
 
       print("Deleting voucher image: $fileName");
 
-      await _client.storage
-          .from(_voucherBucketName)
-          .remove([fileName]);
+      await _client.storage.from(_voucherBucketName).remove([fileName]);
 
       print("Voucher image deleted successfully");
       return true;

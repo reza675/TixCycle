@@ -582,7 +582,7 @@ class _AdminVoucherModalState extends State<AdminVoucherModal> {
     controller.merchantNameC.text = merchantController.text.trim();
     controller.categoryC.text = selectedCategory;
     controller.validUntil.value = validUntil;
-    
+
     // Set tata cara
     controller.tataCara.clear();
     for (var step in tataCara) {

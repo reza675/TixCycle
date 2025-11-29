@@ -64,13 +64,12 @@ class ScanController extends GetxController {
         // Cek apakah QR Code berbeda dengan yang terakhir di-scan
         if (code != lastScannedCode.value) {
           print("   🔒 Set isScanning = false, simpan code");
-          isScanning.value = false; 
+          isScanning.value = false;
           scannedCode.value = code;
           lastScannedCode.value = code;
 
           print("   🚀 Panggil prosesHasilScan()");
           prosesHasilScan(code);
-
         } else {
           print("   ⚠️ Duplikat scan, skip!");
         }
@@ -393,7 +392,7 @@ class ScanController extends GetxController {
         actions: [
           TextButton(
             onPressed: () {
-              Get.back(); 
+              Get.back();
               Future.delayed(const Duration(milliseconds: 300), () {
                 print("🔄 Reset dari tombol OK");
                 resetScanning();
@@ -409,7 +408,7 @@ class ScanController extends GetxController {
           ),
         ],
       ),
-      barrierDismissible: true, 
+      barrierDismissible: true,
     ).then((_) {
       Future.delayed(const Duration(milliseconds: 300), () {
         print("🔄 Reset dari .then()");
@@ -419,7 +418,7 @@ class ScanController extends GetxController {
   }
 
   void navigasiKeEvent(String eventId) {
-    Get.back(); 
+    Get.back();
     Get.toNamed(AppRoutes.LIHAT_TIKET.replaceAll(':id', eventId));
   }
 
@@ -442,7 +441,7 @@ class ScanController extends GetxController {
 
     isScanning.value = true;
     scannedCode.value = '';
-    lastScannedCode.value = ''; 
+    lastScannedCode.value = '';
 
     print("   - isScanning sesudah: ${isScanning.value}");
     print("   - lastScannedCode sesudah: $lastScannedCode");
