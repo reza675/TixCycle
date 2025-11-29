@@ -10,13 +10,16 @@ import 'package:tixcycle/models/ticket_model.dart';
 import 'package:tixcycle/repositories/event_repository.dart';
 import 'package:tixcycle/services/supabase_storage_service.dart';
 import 'package:tixcycle/controllers/beranda_controller.dart';
+import 'package:tixcycle/repositories/location_repository.dart';
+import 'package:geolocator/geolocator.dart';
 
 class AddEventController extends GetxController {
   final EventRepository _eventRepository;
   final SupabaseStorageService _storageService;
   final UserAccountController _userController = Get.find();
+  final LocationRepository _locationRepository;
 
-  AddEventController(this._eventRepository, this._storageService);
+  AddEventController(this._eventRepository, this._storageService, this._locationRepository,);
 
   // form controller
   final nameC = TextEditingController();
@@ -134,21 +137,40 @@ class AddEventController extends GetxController {
           description: form['desc']!.text,
         ));
       }
+GeoPoint coordinates = const GeoPoint(0, 0); 
 
-      final event = EventModel(
-        id: '',
-        name: nameC.text,
-        description: descC.text,
-        imageUrl: imageUrl,
-        date: finalDateTime,
-        venueName: venueC.text,
-        city: cityC.text,
-        address: addressC.text,
-        organizerId: _userController.userProfile.value?.id ?? 'admin',
-        coordinates: const GeoPoint(0, 0),
-        startingPrice: startingPrice == double.infinity ? 0 : startingPrice,
-        tickets: [],
-      );
+  
+  String fullAddressQuery = "${addressC.text}, ${cityC.text}";
+
+  try {
+    final Position? position = await _locationRepository.getCoordinatesFromAddress(fullAddressQuery);
+    if (position != null) {
+      coordinates = GeoPoint(position.latitude, position.longitude);
+    } else {
+      Get.snackbar("Info Lokasi", "Alamat tidak terdeteksi di peta, menggunakan lokasi default (0,0).");
+    }
+  } catch (e) {
+    print("Geocoding error: $e");
+  }
+  
+
+  
+  final event = EventModel(
+    id: '', 
+    name: nameC.text,
+    description: descC.text,
+    imageUrl: imageUrl,
+    date: finalDateTime,
+    venueName: venueC.text,
+    city: cityC.text,
+    address: addressC.text,
+    organizerId: _userController.userProfile.value?.id ?? 'admin',
+
+    coordinates: coordinates, 
+
+    startingPrice: startingPrice == double.infinity ? 0 : startingPrice,
+    tickets: [], 
+  );
 
       await _eventRepository.createEventWithTickets(
           event: event, tickets: tickets);
