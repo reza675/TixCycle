@@ -14,6 +14,13 @@
 
 TixCycle adalah aplikasi mobile yang memudahkan pengguna untuk menemukan, membeli, dan mengelola tiket event atau konser favorit mereka dengan cara yang modern dan ramah lingkungan.  Aplikasi ini mengintegrasikan sistem pemindaian QR code untuk validasi tiket dan menyediakan pengalaman pengguna yang seamless.
 
+---
+
+### 📲 Coba Aplikasi
+[**Download APK (v1.0)**](https://drive.google.com/file/d/10RVtA2N-JX_wwKFUy89f4E4RdIlraUyt/view?usp=sharing)
+
+---
+
 ### 👥 Tim Development
 
 - **Reza Rasendriya Adi Putra** - [@reza675](https://github.com/reza675)
